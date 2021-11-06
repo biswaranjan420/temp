@@ -13,11 +13,11 @@ COPY . .
 RUN rm openvidu-call-front/package-lock.json && \
     rm openvidu-call-back/package-lock.json && \
     # Install openvidu-call-front dependencies and build it for production
-    npm i --prefix openvidu-call-front && \
+    npm i --legacy-peer-deps --prefix openvidu-call-front && \
     npm run build-prod ${BASE_HREF} --prefix openvidu-call-front && \
     rm -rf openvidu-call-front && \
     # Install openvidu-call-back dependencies and build it for production
-    npm i --prefix openvidu-call-back && \
+    npm i --legacy-peer-deps --prefix openvidu-call-back && \
     npm run build --prefix openvidu-call-back && \
     mv openvidu-call-back/dist . && \
     rm -rf openvidu-call-back
