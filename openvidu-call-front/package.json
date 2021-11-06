@@ -16,7 +16,7 @@
         "core-js": "3.7.0",
         "linkifyjs": "2.1.9",
         "ng2-canvas-whiteboard": "^4.0.1",
-        "openvidu-browser": "^2.17.0",
+        "openvidu-browser": "^2.20.0",
         "rxjs": "6.6.3",
         "unique-names-generator": "4.3.1",
         "zone.js": "0.11.3"
