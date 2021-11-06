@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>Resource Setting
+
+    <button mat-icon-button matTooltip="Close" style="float: right;margin-right: 5px !important;" [mat-dialog-close]="true">
+        <mat-icon>close</mat-icon>
+      </button>
+</h2>
+<div style="text-align: center;">
+    <b style="color: blue;">{{successMessage}}</b>
+</div>
+<mat-dialog-content class="mat-typography">
+
+    <mat-list>
+
+        <!-- Speaker Html Design -->
+        <div mat-subheader>
+
+            <mat-icon class="tab-icon">mic</mat-icon><b>Switch Speaker</b></div>
+        <mat-radio-group [ngModel]="micSelected ? micSelected.device : 'None'" color="warn" (change)="changeMicrophone($event)">
+            <mat-list-item *ngFor="let microphone of microphones" style="height: 35px !important;">
+                <mat-radio-button class="radio-button" [value]="microphone.device" [id]="microphone['micindex']">
+                    <div mat-line>{{ microphone.label }}</div>
+                    <div mat-line [id]="'matprog-'+microphone['micindex']" style="display: none;">
+                        <mat-progress-bar mode="buffer"></mat-progress-bar>
+                    </div>
+                </mat-radio-button>
+            </mat-list-item>
+        </mat-radio-group>
+
+        <mat-divider style="margin-top: 40px !important;"></mat-divider>
+
+
+
+        <!-- Camera Html Design -->
+        <div mat-subheader>
+
+            <mat-icon class="tab-icon">videocam</mat-icon><b>Switch Camera</b></div>
+
+        <mat-radio-group [ngModel]="camSelected ? camSelected.device : 'None'" color="warn" (change)="changeCamera($event)">
+            <mat-list-item *ngFor="let camera of cameras" style="height: 35px !important;">
+                <mat-radio-button class="radio-button" [value]="camera.device" [id]="camera['camindex']">
+                    <div mat-line>{{ camera.label }}</div>
+                    <div mat-line [id]="'matprog-'+camera['camindex']" style="display: none;">
+                        <mat-progress-bar mode="buffer"></mat-progress-bar>
+                    </div>
+                </mat-radio-button>
+            </mat-list-item>
+        </mat-radio-group>
+
+    </mat-list>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="true" cdkFocusInitial class="cancelBtn">Cancel</button>
+    <button mat-flat-button color="primary" class="updateBtn" (click)="updateAudioVideoTrack()" [disabled]="isDisabled">Update</button>
+</mat-dialog-actions>

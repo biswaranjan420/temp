@@ -1,0 +1,82 @@
+<div [ngClass]="'section1'">
+    <div id="header" *ngIf="reJoinRoom">
+        <div class="rectangle">
+            <div class="flex-container">
+                <div>
+                    <div class="meetmonk-logo">
+                        <img id="header_img" alt="Indian Health Logo" src="assets/images/header_logo.png" />
+                    </div>
+                </div>
+                <div>
+                    <div class="text-size-15-medium">
+                        Room Number&nbsp;:&nbsp;{{ reJoinRoomName }}
+                    </div>
+                </div>
+                <div>
+                    <div class="ovVersion">
+                        <span>{{ version }}</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- <mat-grid-list [cols]="3" rowHeight="100%" style="position: unset;">
+                <mat-grid-tile style="display: none;">
+                    <div class="meetmonk-logo">
+                        <img id="header_img" alt="MeetMonk Logo" src="assets/images/meetmonk.png" />
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <h4 *ngIf="reJoinRoom" class="text-size-15-medium"> Room Number&nbsp;:&nbsp;{{ reJoinRoomName }}</h4>
+                </mat-grid-tile>
+                <mat-grid-tile style="display: none;">
+                    <div class="ovVersion">
+                        <span>{{ version }}</span>
+                    </div>
+                </mat-grid-tile>
+            </mat-grid-list> -->
+
+        </div>
+    </div>
+    <div [ngClass]="reJoinRoom?'containerMobile':'container'">
+        <div class="ovInfo">
+            <img *ngIf="!reJoinRoom" class="ovLogo" alt="Indian Health Logo" src="assets/images/indianhealthbackg.png" />
+            <h4 *ngIf="!reJoinRoom">Videoconference rooms in one click</h4>
+            <div *ngIf="reJoinRoom">
+                <h4 style="color: black;font-size: 32px;margin-bottom: 0;">You left the room</h4>
+                <h4 style="font-size: 22px;">Thank you for attending the meeting</h4>
+                <!-- <p class="info">Thank you for attending the meeting</p> -->
+            </div>
+
+        </div>
+        <div class="formContainer">
+            <ng-container *ngIf="!reJoinRoom">
+                <div class="roomError" id="requiredNameError" *ngIf="isSubmitted && roomForm.hasError('required')">
+                    Room name is <strong>required</strong>
+                </div>
+                <div class="roomError" id="shortNameError" *ngIf="isSubmitted && roomForm.hasError('minlength')">
+                    Room name is <strong>too short!</strong>
+                </div>
+            </ng-container>
+            <form [formGroup]="roomForm" novalidate (ngSubmit)="goToVideoCall()">
+                <div class="joinForm" *ngIf="!reJoinRoom">
+                    <input matInput class="inputForm" type="text" [formControl]="roomForm" autocomplete="off" id="roomInput" />
+                    <button type="submit" class="joinButton" id="joinButton">JOIN</button>
+
+                </div>
+
+                <!-- <div class="joinForm" > -->
+                <div class="join-button-row" *ngIf="reJoinRoom">
+                    <button mat-flat-button ngClass="home-accent-btn" (click)="toogleReJoinRoomFlag()">Go to a new room</button>
+                    <button mat-flat-button ngClass="home-primary-btn" (click)="reJoinExistingSessionRoom()">Rejoin the room</button>
+
+                </div>
+                <!-- </div> -->
+            </form>
+        </div>
+    </div>
+
+
+
+
+</div>

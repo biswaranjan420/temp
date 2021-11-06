@@ -1,0 +1,169 @@
+<div id="roomConfig" [ngStyle]="{ display: (ovSettings | isAutoPublish) ? 'none' : 'block' }">
+
+
+    <!-- New Design -->
+
+    <div class="background">
+
+        <div class="rectangle">
+            <mat-grid-list cols="1" rowHeight="100%">
+                <mat-grid-tile>
+
+                    <button mat-icon-button [matMenuTriggerFor]="deviceSettingMenu">
+                        <mat-icon matTooltip="Settings"  class="btn-primary">settings</mat-icon>
+
+                      </button>
+
+                    <button mat-icon-button (click)="toggleMic()">
+                        <mat-icon *ngIf="isAudioActive"  matTooltip="Microphone Enabled" class="btn-primary">mic</mat-icon>
+                        <mat-icon *ngIf="!isAudioActive" class="btn-warn" matTooltip="Microphone Disabled"
+                            >mic_off</mat-icon
+                        >
+                    </button>
+
+                    <button mat-icon-button (click)="toggleCam()">
+                        <mat-icon *ngIf="isVideoActive" matTooltip="Camera Enabled" class="btn-primary">videocam</mat-icon>
+                        <mat-icon *ngIf="!isVideoActive"  matTooltip="Camera Disabled" class="btn-warn"
+                            >videocam_off</mat-icon
+                        >
+                    </button>
+                    <div style="border-left: 2px solid #0b5ed7;margin: 3px;" *ngIf="breakpoint===2">&nbsp;</div>
+                    <button mat-icon-button (click)="toggleScreenShare()" *ngIf="breakpoint===2">
+                        <mat-icon *ngIf="screenShareEnabled" matTooltip="Screen Share Enabled" class="btn-primary">screen_share</mat-icon>
+                        <mat-icon *ngIf="!screenShareEnabled" class="btn-warn" matTooltip="Screen Share Disabled">
+                            stop_screen_share</mat-icon
+                        >
+                    </button>
+
+                    <!-- <mat-icon matTooltip="Nickname">person</mat-icon> -->
+                    <!-- Code for Button toogle menu -->
+
+                    <mat-menu #deviceSettingMenu="matMenu">
+                        <button mat-menu-item [matMenuTriggerFor]="speakerMenuTrigger">Speaker</button>
+                        <button mat-menu-item [matMenuTriggerFor]="cameraMenuTrigger">Camera</button>
+                    </mat-menu>
+                    <mat-menu #speakerMenuTrigger="matMenu">
+                        <button mat-menu-item *ngFor="let microphone of microphones" [ngClass]="isAudioActive && (micSelected && micSelected.device === microphone.device)?'menu-btn-primary':'blank'" (click)="onMicrophoneSelected(microphone.device)"> {{ microphone.label }}</button>
+
+                    </mat-menu>
+                    <mat-menu #cameraMenuTrigger="matMenu">
+                        <button mat-menu-item *ngFor="let camera of cameras" [ngClass]="isVideoActive && (camSelected && camSelected.device === camera.device)?'menu-btn-primary':'blank'" (click)="onCameraSelected(camera.device)">{{ camera.label }}</button>
+
+                    </mat-menu>
+                    <!-- //End of Code for Button Toogle Menu -->
+
+                </mat-grid-tile>
+            </mat-grid-list>
+        </div>
+        <div class="rectangle">
+            <mat-grid-list [cols]="breakpoint===1?2:3" rowHeight="100%">
+                <mat-grid-tile>
+                    <div class="meetmonk-logo">
+                        <img id="header_img" alt="Indian Health Logo" src="assets/images/header_logo.png" />
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile *ngIf="breakpoint===2">
+                    Room Number : {{ mySessionId }}
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <button mat-mini-fab (click)="close()" class="closeButton" id="closeButton">
+						<mat-icon color="warn" matTooltip="Close">highlight_off</mat-icon>
+					</button>
+                </mat-grid-tile>
+            </mat-grid-list>
+
+
+        </div>
+
+        <div class="rectangle">
+
+            <!--  -->
+            <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)">
+                <mat-grid-tile class="videoContainerTile">
+                    <div class="videoContainer">
+                        <div *ngFor="let localUser of localUsers; let i = index">
+                            <!-- Only webcam video will be shown if webcamera is available -->
+                            <ov-video *ngIf="(localUser.isCamera() && hasVideoDevices) || localUser.isScreen()" [streamManager]="localUser.streamManager" [className]="localUsers.length > 1 && i === 0 ? 'ovVideoSmall' : ''"></ov-video>
+                            <div class="cameraMessageContainer" *ngIf="localUser.isCamera() && !hasVideoDevices">
+                                <span *ngIf="!hasVideoDevices && !hasAudioDevices">Oops! Camera and microphone are not available</span
+                                >
+                                <span *ngIf="!hasVideoDevices && hasAudioDevices">Oops! Camera is not available</span>
+                                <span *ngIf="hasVideoDevices && !hasAudioDevices">Oops! Microphone is not available</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </mat-grid-tile>
+                <mat-grid-tile class="participantContainerTile">
+                    <mat-card class="participantContainer">
+
+                        <mat-card-title>Please provide the following details</mat-card-title>
+                        <mat-card-subtitle style="color: grey;font-weight: 700;margin-top: 20px;">Your Avatar</mat-card-subtitle>
+                        <!-- <mat-card-header>
+                                  
+                            
+                        </mat-card-header> -->
+
+                        <mat-card-content>
+                            <div class="avatarFlexSection">
+                                <div>
+                                    <div class="dummy-circle" *ngIf="!capturedAvatar">
+                                        <img src="assets/images/favicon.png" alt="Avatar" class="dummyAvatar">
+
+                                    </div>
+                                    <div class="capture-circle" *ngIf="capturedAvatar">
+                                        <img [src]="capturedAvatar" alt="Avatar" class="myAvatar">
+
+                                    </div>
+                                </div>
+                                <div style="margin-left: 20px;">
+                                    <button mat-flat-button style="color: #0b5ed7;background: none;" (click)="captureAvatar()">{{captuteButtonLabel}}</button>
+                                </div>
+                                <div style="margin-left: 10px;" *ngIf="capturedAvatar">
+                                    <button mat-flat-button style="color: #0b5ed7;background: none;" (click)="resetCaptureAvatar()">Reset</button>
+                                </div>
+                            </div>
+
+                            <form id="nicknameForm" class="alternate-theme">
+
+                                <mat-form-field appearance="outline" style="padding-bottom: 10px;">
+                                    <mat-label style="font-size: 20px;color: black;">Your Name</mat-label>
+                                    <input style="font-size: 20x;color: grey;" matInput placeholder="What should we call you?" [formControl]="nicknameFormControl" [errorStateMatcher]="matcher" (keypress)="eventKeyPress($event)" autocomplete="off" />
+                                    <mat-error *ngIf="nicknameFormControl.hasError('required')" style="font-size: 16px;">
+                                        Nickname is <strong>required</strong>
+                                    </mat-error>
+                                    <mat-error *ngIf="nicknameFormControl.hasError('maxlength')" style="font-size: 16px;">
+                                        Nickname is <strong>too long!</strong>
+                                    </mat-error>
+
+                                </mat-form-field>
+
+                                <button mat-flat-button style="font-size: 20px;" class="menu-btn-primary" *ngIf="breakpoint===2" (click)="joinSession()" form="nicknameForm" id="joinMeetingButton">Join</button>
+
+
+
+                            </form>
+
+                        </mat-card-content>
+
+                    </mat-card>
+                    <!-- <div class="videoContainer" style="width: 90%;text-align: left;">
+                        <mat-card>Simple card</mat-card>
+
+
+
+                    </div> -->
+                </mat-grid-tile>
+            </mat-grid-list>
+
+            <!--  -->
+        </div>
+        <div class="footerbutton" *ngIf="breakpoint===1">
+            <button mat-flat-button style="font-size: 20px;" class="menu-btn-primary" (click)="joinSession()" form="nicknameForm" id="joinMeetingButton">Join</button>
+        </div>
+    </div>
+
+
+
+</div>

@@ -1,0 +1,17 @@
+.tab-icon {
+    margin-right: 8px !important;
+}
+
+.radio-button {
+    padding: 5px !important;
+}
+
+.updateBtn {
+    background: #00ad4e;
+    color: #fff;
+}
+
+.cancelBtn {
+    background: #ff4081;
+    color: #fff;
+}

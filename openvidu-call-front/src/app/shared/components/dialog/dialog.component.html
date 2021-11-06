@@ -1,0 +1,13 @@
+<div mat-dialog-title>
+
+    <i><mat-icon color="accent" style="vertical-align: -5px;margin-right: 5px;">help_outline</mat-icon>{{data['message']}}</i>
+
+</div>
+
+<mat-dialog-content>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close style="background-color: #cfcabe;" *ngIf="data['cancelBtn']">Cancel</button>
+    <button mat-flat-button [mat-dialog-close]="true" style="background-color: #1890ff;" *ngIf="data['okBtn']">OK</button>
+</mat-dialog-actions>

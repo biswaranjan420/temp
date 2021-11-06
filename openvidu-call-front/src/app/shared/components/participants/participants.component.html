@@ -1,0 +1,104 @@
+<div class="participants-container">
+    <p *ngIf="participants.length === 0" class="text-info textCenter">No participants connected</p>
+    <p *ngIf="participants.length > 0" class="text-info textCenter">{{ participants.length + 1 }} participants connected</p>
+
+    <table mat-table class="mat-elevation-z8" *ngIf="participants.length > 0">
+        <th mat-header-cell>
+            <button type="button" class="button-round" (click)="disableAudioForAll()">
+                <img style="height: 25px;" src="/assets/icons/MicOff.svg"/>
+            </button>
+            <p class="button-round-after">Mute audio for all</p>
+
+            <!-- <button type="button" (click)="disableAudioForAll()"><img src="/assets/icons/Mic On.svg"></button>Mute audio for all -->
+        </th>
+        <th mat-header-cell>
+
+            <button type="button" class="button-round" (click)="enableAudioForAll()">
+                <img style="height: 25px;" src="/assets/icons/MicOn.svg"/>
+            </button>
+            <p class="button-round-after">Unmute audio for all</p>
+
+
+            <!-- <button mat-raised-button color="accent" (click)="enableAudioForAll()">Unmute audio for all</button> -->
+        </th>
+    </table>
+    <table mat-table class="mat-elevation-z8" *ngIf="participants.length > 0">
+        <th mat-header-cell>
+
+            <button type="button" class="button-round" (click)="disableCameraForAll()">
+                <img style="height: 20px;" src="/assets/icons/CamOff.svg"/>
+            </button>
+            <p class="button-round-after">Mute Camera for all</p>
+
+
+            <!-- <button mat-raised-button color="warn" (click)="disableCameraForAll()">Mute Camera for all</button> -->
+        </th>
+        <th mat-header-cell>
+            <button type="button" class="button-round" (click)="enableCameraForAll()">
+                <img style="height: 16px;" src="/assets/icons/CamOn.svg"/>
+            </button>
+            <p class="button-round-after">Unmute Camera for all</p>
+
+            <!-- <button mat-raised-button color="accent" (click)="enableCameraForAll()">Unmute Camera for all</button> -->
+        </th>
+    </table>
+
+
+
+    <section class="progress-bar-section" *ngIf="isProgressBar">
+        <mat-progress-bar class="progress-bar-margin" color="primary" mode="indeterminate" value="50" bufferValue="75">
+        </mat-progress-bar>
+    </section>
+
+
+    <table mat-table class="mat-elevation-z8" *ngIf="localUser.length > 0" ngClass="localUserTable">
+        <th mat-header-cell>
+            <mat-icon mat-list-icon ngClass="white_icon">person</mat-icon>
+        </th>
+        <th mat-header-cell>
+            {{localUser[0].nickname}}
+        </th>
+        <th mat-header-cell>
+            <i>Host</i>
+        </th>
+        <th mat-header-cell>
+            <button mat-icon-button (click)="toggleAudioToLocalUser()">
+                <mat-icon *ngIf="localUser[0].streamManager && localUser[0].streamManager.stream.audioActive" matTooltip="Disable audio" ngClass="white_icon">mic</mat-icon>
+                <mat-icon *ngIf="localUser[0].streamManager &&  !localUser[0].streamManager.stream.audioActive"  matTooltip="Enable audio" color="warn">mic_off</mat-icon>
+            </button>
+
+        </th>
+        <th mat-header-cell>
+            <button mat-icon-button (click)="toggleCameraToLocalUser()">
+                <mat-icon *ngIf="localUser[0].streamManager && localUser[0].streamManager.stream.videoActive" matTooltip="Mute your cam" ngClass="white_icon">videocam</mat-icon>
+                <mat-icon *ngIf="localUser[0].streamManager &&  !localUser[0].streamManager.stream.videoActive" color="warn" matTooltip="Unmute your cam">videocam_off</mat-icon>
+            </button>
+
+        </th>
+    </table>
+
+    <table mat-table class="mat-elevation-z8" *ngFor="let participant of participants" ngClass="remoteUserTable">
+        <th mat-header-cell>
+            <mat-icon mat-list-icon ngClass="white_icon">person</mat-icon>
+        </th>
+        <th mat-header-cell>
+            {{participant.nickname}}
+        </th>
+        <th mat-header-cell>
+            <i *ngIf="participant.getParticipantsMenu()">Host</i>
+            <i *ngIf="!participant.getParticipantsMenu()">Client</i>
+        </th>
+        <th mat-header-cell>
+            <button mat-icon-button (click)="toggleAudioToUser(participant)">
+                <mat-icon *ngIf="participant.streamManager && participant.streamManager.stream.audioActive" matTooltip="Disable audio" ngClass="white_icon">mic</mat-icon>
+                <mat-icon *ngIf="participant.streamManager &&  !participant.streamManager.stream.audioActive"  matTooltip="Enable audio" color="warn">mic_off</mat-icon>
+            </button>
+        </th>
+        <th mat-header-cell>
+            <button mat-icon-button (click)="toggleCameraTolUser(participant)">
+                <mat-icon *ngIf="participant.streamManager && participant.streamManager.stream.videoActive" matTooltip="Mute your cam" ngClass="white_icon">videocam</mat-icon>
+                <mat-icon *ngIf="participant.streamManager &&  !participant.streamManager.stream.videoActive" color="warn" matTooltip="Unmute your cam">videocam_off</mat-icon>
+            </button>
+        </th>
+    </table>
+</div>

@@ -1,0 +1,91 @@
+<div id="chatContainer">
+    <div id="chatComponent" [class.chatComponentLight]="lightTheme">
+        <div id="chatToolbar">
+            <span> CHAT</span>
+            <button mat-icon-button (click)="close()" id="closeButton">
+				<mat-icon matTooltip="Close" color="warn">highlight_off</mat-icon>
+			</button>
+        </div>
+
+
+        <div class="message-wrap" #chatScroll>
+            <div *ngFor="let data of messageList" class="message" [ngClass]="data.isLocal ? 'right' : 'left'">
+                <img class="user-img" [src]="data.userAvatar" />
+                <div class="msg-detail">
+                    <div class="msg-info">
+                        <p>{{ data.nickname }}</p>
+                    </div>
+                    <div class="msg-content">
+                        <span class="triangle"></span>
+                        <p class="text" [innerHTML]="data.message | linkify"></p>
+
+                    </div>
+                    <!-- <a *ngFor="let media of data.mediaFiles" href="javascript:void(0)" (click)="downloadFile(media)">File.png</a> -->
+                </div>
+            </div>
+
+            <!-- Typing toolbar -->
+            <div id="typingToolbar" *ngIf="messageTypingUserList.length>0">
+                <table mat-table class="mat-elevation-z8" *ngFor="let typingUsers of messageTypingUserList;let i = index">
+                    <td mat-cell>
+                        <mat-icon aria-hidden="false" aria-label="Example home icon" class="type-person">person</mat-icon><i>{{typingUsers['nickname']}} typing...</i></td>
+                </table>
+            </div>
+            <!-- //End of typing toolbar -->
+            <!-- File Upload Progress Bar -->
+            <!-- <div class="fileProgress" *ngIf="files.length>0">
+                <ul>
+                    <li *ngFor="let file of files">
+                        <span>{{file['name']}}</span>
+                        <button mat-icon-button (click)="removeFile(file['index'])">
+                            <mat-icon matTooltip="Remove file" color="warn">close</mat-icon>
+                        </button>
+                    </li>
+                </ul>
+            </div> -->
+            <!-- //End of File Upload Progress Bar -->
+
+        </div>
+
+
+
+
+
+
+        <div id="messageInput">
+            <emoji-mart (emojiClick)="addEmoji($event)" [showPreview]="false" *ngIf="toggled" [style]="{ position: 'absolute', bottom: '55px', left: '0' }">
+
+            </emoji-mart>
+            <!-- <input #chatInput placeholder="Send a message" autocomplete="off" (keypress)="eventKeyPress($event)" [(ngModel)]="message" id="chatInput" />
+            <!-- <input #chatInput placeholder="Send a message" autocomplete="off" (keyup)="chatInputKeyUp($event)" (keydown)="chatInputKeyDown($event)" (keypress)="eventKeyPress($event)" [(ngModel)]="message" id="chatInput" /> -->
+            <!-- <button mat-mini-fab id="sendButtosn" (click)="sendMessage()">
+				<mat-icon matTooltip="Send">send</mat-icon>
+            </button>
+            <button mat-mini-fab id="sendButston" (click)="sendMessage()" color="primary">
+				<mat-icon matTooltip="Attachment">attachment</mat-icon>
+            </button>  -->
+            <div class="mojoBtn">
+
+                <button mat-mini-fab (click)="togleEmoji()">
+                    <span class="material-icons" [ngStyle]="{'color':'yellow'}" >
+                        mood
+                        </span>
+                </button>
+            </div>
+            <div class="msgInput">
+                <input #chatInput placeholder="Send a message" autocomplete="off" (keyup)="chatInputKeyUp($event)" (keydown)="chatInputKeyDown($event)" (keypress)="eventKeyPress($event)" [(ngModel)]="message" id="chatInput" />
+                <!-- <input type="file" #fileInput id="fileUpload" name="fileUpload" multiple="multiple" accept="*" style="display:none;" /> -->
+            </div>
+            <!-- <div class="filebtn">
+                <button mat-mini-fab color="primary" (click)="fileUploadDialBox()">
+                    <mat-icon matTooltip="Attachment">attachment</mat-icon>
+                </button>
+            </div> -->
+            <div class="sendBtn">
+                <button mat-mini-fab color="primary" (click)="sendMessage()">
+                    <mat-icon matTooltip="Send">send</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

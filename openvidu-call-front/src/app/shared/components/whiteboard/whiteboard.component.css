@@ -1,0 +1,5 @@
+::ng-deep .canvas_whiteboard,
+ ::ng-deep .incomplete_shapes_canvas_whiteboard {
+    width: 100% !important;
+    height: 100% !important;
+}

@@ -1,0 +1,98 @@
+<mat-toolbar id="header" role="heading" [class.headerLight]="lightTheme" class="container" fxLayout fxLayoutAlign="center" fxLayoutGap="10px">
+    <div fxFlex="2%" *ngIf="isConfCoordinator">
+        <button id="navParticipantsButton" mat-icon-button [disabled]="isConnectionLost" (click)="toggleParticipantsList()">
+      <mat-icon matBadgeSize="small" matBadgePosition="above after" matBadgeColor="accent"
+                matTooltip="Toggle participants menu">menu
+      </mat-icon>
+    </button>
+    </div>
+
+    <div [fxFlex]="isConfCoordinator?'18%':'20%'" *ngIf="!isMobile">
+        <app-toolbar-logo [lightTheme]="lightTheme" [sessionId]="mySessionId" [compact]="compact" [logoUrl]="logoUrl"></app-toolbar-logo>
+    </div>
+    <div [fxFlex]="isMobile?'98%':'78%'" fxFlexOrder="2">
+        <div align="center" class="buttonsContainer">
+
+            <!-- Setting button -->
+            <!-- (click)="toggleSettings()" -->
+            <button mat-icon-button (click)="toggleSettings()">
+        <mat-icon matTooltip="Open Settings" *ngIf="isSettingOpened">settings</mat-icon>
+        <mat-icon matTooltip="Close Settings" color="warn" *ngIf="!isSettingOpened">settings</mat-icon>
+      </button>
+
+            <!-- //Settings button -->
+            <!-- mic button -->
+            <button id="navMicrophoneButton" mat-icon-button (click)="toggleMicrophone()" [disabled]="isConnectionLost" *ngIf="hasAudioDevices && (ovSettings | hasAudio)">
+        <mat-icon *ngIf="isWebcamAudioEnabled" matTooltip="Mute your audio">mic</mat-icon>
+        <mat-icon *ngIf="!isWebcamAudioEnabled" color="warn" matTooltip="Unmute your audio">mic_off</mat-icon>
+      </button>
+            <!-- //mic  button -->
+
+            <!-- Camera button -->
+            <button id="navCameraButton" mat-icon-button (click)="toggleCamera()" [disabled]="isConnectionLost" *ngIf="!this.ovSettings || (hasVideoDevices && (this.ovSettings | hasVideo))">
+        <mat-icon *ngIf="isWebcamVideoEnabled" matTooltip="Mute your cam">videocam_outline
+        </mat-icon>
+        <mat-icon *ngIf="!isWebcamVideoEnabled" color="warn" matTooltip="Unmute your cam">videocam_off</mat-icon>
+
+
+      </button>
+            <!-- //Camera button -->
+
+            <!-- Message button -->
+            <button mat-icon-button (click)="toggleChat()" [disabled]="isConnectionLost" *ngIf="ovSettings | hasChat">
+        <mat-icon matBadge="{{ newMessagesNum }}" [matBadgeHidden]="newMessagesNum === 0"
+                  matBadgePosition="above before" matTooltip="Chat" matBadgeColor="accent">chat
+        </mat-icon>
+      </button>
+            <!--// Message button -->
+
+            <!--         A Verical Line Border-->
+            <div class="vert-border">&nbsp;</div>
+            <!--      //End of a Vertical Line border-->
+
+            <!-- Screenshare button -->
+            <button id="navScreenButton" mat-icon-button (click)="toggleScreenShare()" [disabled]="isConnectionLost" *ngIf="ovSettings | hasScreenSharing">
+        <mat-icon *ngIf="!isScreenShareEnabled" matTooltip="Screen share" color="warn">stop_screen_share
+        </mat-icon>
+        <mat-icon *ngIf="isScreenShareEnabled" matTooltip="Stop sharing">screen_share</mat-icon>
+      </button>
+            <!-- //Screenshare button -->
+
+
+            <!-- Whiteboard button -->
+            <button id="navWhiteboardButton" mat-icon-button (click)="toggleWhiteboard()" [disabled]="isConnectionLost">
+        <mat-icon *ngIf="!isWhiteboardOpened" matTooltip="Open whiteboard" color="warn">brush</mat-icon>
+        <mat-icon class="green-icon" *ngIf="isWhiteboardOpened" matTooltip="Close whiteboard">brush</mat-icon>
+      </button>
+            <!--// Whiteboard button -->
+
+            <!--         A Verical Line Border-->
+            <div class="vert-border">&nbsp;</div>
+            <!--      //End of a Vertical Line border-->
+
+
+            <!-- Fullscreen button -->
+            <button mat-icon-button (click)="toggleFullscreen()" [disabled]="isConnectionLost" *ngIf="ovSettings | hasFullscreen">
+        <mat-icon matTooltip="Fullscreen">{{ fullscreenIcon }}</mat-icon>
+      </button>
+            <!-- //Fullscreen button -->
+
+            <!-- Automatic / grid layout button -->
+            <button mat-icon-button (click)="toggleSpeakerLayout()" [disabled]="isConnectionLost" *ngIf="ovSettings | hasLayoutSpeaking">
+        <mat-icon matTooltip="Enable speaker layout" color="warn" *ngIf="!isAutoLayout">voice_over_off</mat-icon>
+        <mat-icon matTooltip="Disable speaker layout" *ngIf="isAutoLayout">record_voice_over</mat-icon>
+      </button>
+            <!-- //Automatic / grid layout button -->
+            <!--         A Verical Line Border-->
+            <div class="vert-border">&nbsp;</div>
+            <!--      //End of a Vertical Line border-->
+            <!-- Leave seassion button -->
+            <button mat-icon-button (click)="leaveSession()" id="navLeaveButton" *ngIf="ovSettings | hasExit">
+        <mat-icon color="warn" matTooltip="Leave the session">power_settings_new</mat-icon>
+      </button>
+            <!--// Leave seassion button -->
+        </div>
+    </div>
+
+
+</mat-toolbar>
