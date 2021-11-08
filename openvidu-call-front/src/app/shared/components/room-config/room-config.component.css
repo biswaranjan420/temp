@@ -126,7 +126,7 @@
 } */
 
 #header_img {
-    max-width: 150px;
+    max-width: 300px;
 }
 
 #sessionInfo {
@@ -1439,15 +1439,16 @@ mat-card {
 
 .rectangle:nth-child(2) {
     box-sizing: border-box;
-    height: 8%;
-    background-color: #FFFFFF;
+    height: 10%;
+    background-color: #6093a7;
     position: relative;
     border: 1px solid black;
+    color: #ffffff;
 }
 
 .rectangle:nth-child(3) {
     box-sizing: border-box;
-    height: 87%;
+    height: 85%;
     position: relative;
     margin: 5px 8% 0 8%;
     /*margin: 5% 8% 0 8%;*/

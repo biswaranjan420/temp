@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormControl } from '@angular/forms';
 import { NavigationExtras, Router } from '@angular/router';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
@@ -30,6 +30,11 @@ export class HomeComponent implements OnInit {
 			this.reJoinRoomName = sessionStorage.getItem(this.reJoinRoomKey);
 		}
 		// Rejoin button code
+	}
+	@HostListener('window:contextmenu',['$event'])
+	contextmenu(event: Event) {
+		event.preventDefault();
+		alert('This function is not allowed here.');
 	}
 
 	public goToVideoCall() {

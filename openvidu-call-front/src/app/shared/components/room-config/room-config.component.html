@@ -59,7 +59,8 @@
             <mat-grid-list [cols]="breakpoint===1?2:3" rowHeight="100%">
                 <mat-grid-tile>
                     <div class="meetmonk-logo">
-                        <img id="header_img" alt="Indian Health Logo" src="assets/images/header_logo.png" />
+
+                        <img id="header_img" alt="Indian Health Logo" src="assets/images/header_logo.jpeg" />
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile *ngIf="breakpoint===2">
@@ -67,7 +68,7 @@
                 </mat-grid-tile>
                 <mat-grid-tile>
                     <button mat-mini-fab (click)="close()" class="closeButton" id="closeButton">
-						<mat-icon color="warn" matTooltip="Close">highlight_off</mat-icon>
+						<mat-icon color="primary" matTooltip="Close">highlight_off</mat-icon>
 					</button>
                 </mat-grid-tile>
             </mat-grid-list>

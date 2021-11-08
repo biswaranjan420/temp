@@ -43,7 +43,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 	isWebcamVideoEnabled: boolean;
 
 	fullscreenIcon = VideoFullscreenIcon.BIG;
-	logoUrl = 'assets/images/header_logo.png';
+	logoUrl = 'assets/images/header_logo.jpeg';
 
 	participantsNames: string[] = [];
 

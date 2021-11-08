@@ -7,8 +7,8 @@ import { Component, Input } from '@angular/core';
 			<a>
 				<img id="header_img" alt="MeetMonk Logo" [src]="logoUrl" />
 			</a>
-			<div *ngIf="!compact && sessionId" [ngClass]="{'titleContent': true, 'titleContentLight': lightTheme, 'titleContentDark': !lightTheme}">
-				<span id="session-title">{{ sessionId }}</span>
+			<div *ngIf="!compact && sessionId" [ngClass]="{'titleContent': true, 'titleContentLight': lightTheme, 'titleContentDark': false}">
+				<span id="session-title" style="margin-left:10px">{{ sessionId }}</span>
 			</div>
 		</div>
 	`,

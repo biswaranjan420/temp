@@ -72,10 +72,18 @@ export class UtilsService {
 		if (message && message != '') {
 			message = message.replace(/OpenVidu/, 'Indian Health VC');
 		}
-		this.dialogRef = this.dialog.open(DialogErrorComponent, {
-			data: { header: header, message: message },
-			disableClose
-		});
+		if(header ==='Connection Problem'){
+			this.dialogRef = this.dialog.open(DialogErrorComponent, {
+				data: { header: header, message: message },
+				disableClose
+			});
+		}else{
+			this.dialogRef = this.dialog.open(DialogErrorComponent, {
+				data: { header: header, message: 'Something went wrong please contact System Admin.' },
+				disableClose
+			});
+		}
+		
 	}
 
 	closeDialog() {

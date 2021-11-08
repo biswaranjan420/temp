@@ -136,7 +136,11 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.oVLayout.update();
 		this.checkSizeComponent();
 	}
-
+	@HostListener('window:contextmenu',['$event'])
+	contextmenu(event: Event) {
+		event.preventDefault();
+		alert('This function is not allowed here.');
+	}
 	async ngOnInit() {
 		this.localUsersService.initialize();
 		this.openViduWebRTCService.initialize();
