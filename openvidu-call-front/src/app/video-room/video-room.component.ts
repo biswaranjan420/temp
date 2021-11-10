@@ -92,7 +92,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	isWhiteboardOpened: boolean;
 	private dialogRef: MatDialogRef<DeviceSettingComponent, any>;
 	private alertDialogRef: MatDialogRef<DialogComponent, any>;
-
+	amISpeaking=false;
 	constructor(
 		private router: Router,
 		private utilsSrv: UtilsService,
@@ -141,6 +141,13 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		event.preventDefault();
 		alert('This function is not allowed here.');
 	}
+
+	@HostListener('document:keydown.control.shift.i', ['$event'])
+	keydownHandler(event: Event) {
+		event.preventDefault();
+		alert('This function is not allowed here.');
+	}
+	
 	async ngOnInit() {
 		this.localUsersService.initialize();
 		this.openViduWebRTCService.initialize();
@@ -361,6 +368,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	toggleSpeakerLayout() {
 		if (!this.localUsersService.isScreenShareEnabled()) {
 			this.isAutoLayout = !this.isAutoLayout;
+			if(!this.isAutoLayout){
+                this.amISpeaking = false;
+			}
 
 			this.log.d('Automatic Layout ', this.isAutoLayout ? 'Disabled' : 'Enabled');
 			if (this.isAutoLayout) {
@@ -550,6 +560,13 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.session.on('publisherStartSpeaking', (event: PublisherSpeakingEvent) => {
 			const someoneIsSharingScreen = this.remoteUsersService.someoneIsSharingScreen();
 			if (!this.localUsersService.isScreenShareEnabled() && !someoneIsSharingScreen) {
+				let self=this;
+				this.amISpeaking = true;
+				setTimeout(() => {
+					if(self.amISpeaking){
+						self.amISpeaking = false;
+					}
+				}, 4000);
 				const elem = event.connection.stream.streamManager.videos[0].video;
 				const element = this.utilsSrv.getHTMLElementByClassName(elem, LayoutType.ROOT_CLASS);
 				this.resetAllBigElements();

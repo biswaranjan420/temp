@@ -16,6 +16,12 @@ export class HomeComponent implements OnInit {
 	reJoinRoomKey = 'MeetMonkConfRoomName';
 	reJoinRoomName: string;
 	isSubmitted=false;;
+	@HostListener('document:keydown.control.shift.i', ['$event'])
+	keydownHandler(event: Event) {
+		event.preventDefault();
+		alert('This function is not allowed here.');
+	}
+	
 
 	constructor(private router: Router, public formBuilder: FormBuilder) { }
 

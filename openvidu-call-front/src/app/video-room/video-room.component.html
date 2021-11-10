@@ -4,8 +4,8 @@
     <div *ngIf="localUsers && localUsers.length > 0">
         <div *ngIf="isConnectionLost" class="reconnecting-container"></div>
         <app-toolbar *ngIf="ovSettings | hasToolbar" [lightTheme]="lightTheme" [compact]="compact" [isConfCoordinator]="localUsers[0].getParticipantsMenu()" [ovSettings]="ovSettings" [hasVideoDevices]="hasVideoDevices" [hasAudioDevices]="hasAudioDevices" [isWebcamAudioEnabled]="toolbarMicIconEnabled()"
-            [isAutoLayout]="isAutoLayout" [isConnectionLost]="isConnectionLost" (camButtonClicked)="toggleCam()" (micButtonClicked)="toggleMic()" (screenShareClicked)="toggleScreenShare()" (layoutButtonClicked)="toggleSpeakerLayout()" (leaveSessionButtonClicked)="leaveSession()"
-            (participantsMenuButtonClicked)="toggleParticipantsMenu()" (settingButtonClicked)="toggleSettings($event)" #toolbarComponent></app-toolbar>
+            [isAutoLayout]="isAutoLayout" [amISpeaking]="amISpeaking" [isConnectionLost]="isConnectionLost" (camButtonClicked)="toggleCam()" (micButtonClicked)="toggleMic()" (screenShareClicked)="toggleScreenShare()" (layoutButtonClicked)="toggleSpeakerLayout()"
+            (leaveSessionButtonClicked)="leaveSession()" (participantsMenuButtonClicked)="toggleParticipantsMenu()" (settingButtonClicked)="toggleSettings($event)" #toolbarComponent></app-toolbar>
 
         <mat-sidenav-container class="sidenav-container" id="room-container" [class.boundsLight]="lightTheme" fullscreen>
 

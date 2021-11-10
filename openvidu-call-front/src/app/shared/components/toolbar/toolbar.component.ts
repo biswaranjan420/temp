@@ -25,6 +25,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
 	@Input() isWebcamAudioEnabled: boolean;
 	@Input() isAutoLayout: boolean;
+	@Input() amISpeaking: boolean;
 	@Input() isConnectionLost: boolean;
 	@Input() hasVideoDevices: boolean;
 	@Input() hasAudioDevices: boolean;

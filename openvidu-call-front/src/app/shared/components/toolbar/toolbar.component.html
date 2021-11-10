@@ -13,6 +13,7 @@
     <div [fxFlex]="isMobile?'98%':'78%'" fxFlexOrder="2">
         <div align="center" class="buttonsContainer">
 
+
             <!-- Setting button -->
             <!-- (click)="toggleSettings()" -->
             <button mat-icon-button (click)="toggleSettings()">
@@ -80,7 +81,7 @@
             <!-- Automatic / grid layout button -->
             <button mat-icon-button (click)="toggleSpeakerLayout()" [disabled]="isConnectionLost" *ngIf="ovSettings | hasLayoutSpeaking">
         <mat-icon matTooltip="Enable speaker layout" color="warn" *ngIf="!isAutoLayout">voice_over_off</mat-icon>
-        <mat-icon matTooltip="Disable speaker layout" *ngIf="isAutoLayout">record_voice_over</mat-icon>
+        <mat-icon matTooltip="Disable speaker layout" *ngIf="isAutoLayout"  [ngStyle]="amISpeaking?{'color': '#33F0FF'} : {'color': ''}">record_voice_over</mat-icon>
       </button>
             <!-- //Automatic / grid layout button -->
             <!--         A Verical Line Border-->
