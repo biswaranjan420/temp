@@ -134,4 +134,9 @@ export class RemoteUsersService {
 
 		this.users.push(user);
 	}
+	userSpeakingDetection(connectionId: string, isSpeaking: boolean) {
+		const user = this.getRemoteUserByConnectionId(connectionId);
+		user?.setUserSpeaking(isSpeaking);
+		this._remoteUsers.next(this.users);
+	}
 }

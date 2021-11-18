@@ -45,6 +45,11 @@ export class UserModel {
 	*/
 	private participantsMenu: boolean;
 
+	/*
+	* isSpeaking flag that is true if participants is speaking
+	*/
+	private isSpeaking: boolean;
+
 	/**
 	 * @hidden
 	 */
@@ -172,6 +177,12 @@ export class UserModel {
 	}
 	public getParticipantsMenu(): boolean {
 		return this.participantsMenu;
+	}
+	public setUserSpeaking(isSpeaking: boolean) {
+		this.isSpeaking = isSpeaking;
+	}
+	public getUserSpeaking(): boolean {
+		return this.isSpeaking;
 	}
 
 }

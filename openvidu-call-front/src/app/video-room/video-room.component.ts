@@ -221,6 +221,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.subscribeToToggleAudioFromConferenceHoster();
 		this.subscribeToToggleCameraFromConferenceHoster();
 		this.whiteboardSrv.subscribeToWhiteboardEvents();
+		this.subscribeToSpeechDetection();
 		await this.connectToSession();
 		// Workaround, firefox does not have audio when publisher join with muted camera
 		if (this.utilsSrv.isFirefox() && !this.localUsersService.hasWebcamVideoActive()) {
@@ -368,13 +369,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	toggleSpeakerLayout() {
 		if (!this.localUsersService.isScreenShareEnabled()) {
 			this.isAutoLayout = !this.isAutoLayout;
-			if(!this.isAutoLayout){
-                this.amISpeaking = false;
-			}
-
 			this.log.d('Automatic Layout ', this.isAutoLayout ? 'Disabled' : 'Enabled');
 			if (this.isAutoLayout) {
-				this.subscribeToSpeechDetection();
+				this.subscribeTotoggleSpeakerLayout();
 				return;
 			}
 			this.log.d('Unsubscribe to speech detection');
@@ -384,6 +381,42 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			return;
 		}
 		this.log.w('Screen is enabled. Speech detection has been rejected');
+
+	}
+
+	private subscribeTotoggleSpeakerLayout() {
+		this.log.d('Subscribe to speech detection', this.session);
+		// Has been mandatory change the user zoom property here because of
+		// zoom icons and cannot handle publisherStartSpeaking event in other component
+		this.session.on('publisherStartSpeaking', (event: PublisherSpeakingEvent) => {
+			const someoneIsSharingScreen = this.remoteUsersService.someoneIsSharingScreen();
+			if (!this.localUsersService.isScreenShareEnabled() && !someoneIsSharingScreen) {
+				const elem = event.connection.stream.streamManager.videos[0].video;
+				const element = this.utilsSrv.getHTMLElementByClassName(elem, LayoutType.ROOT_CLASS);
+				this.resetAllBigElements();
+				this.remoteUsersService.setUserZoom(event.connection.connectionId, true);
+				this.onToggleVideoSize({ element });
+
+			}
+		});
+	}
+	private subscribeToSpeechDetection() {
+		this.session.on('publisherStartSpeaking', (event: PublisherSpeakingEvent) => {
+			let self = this;
+			const connectionId = event.connection.connectionId;
+			const isMyOwnConnection = this.openViduWebRTCService.isMyOwnConnection(connectionId);
+			if (!isMyOwnConnection) {
+				//Set User Model is speaking by matching connectionId
+				this.amISpeaking = true;
+				this.remoteUsersService.userSpeakingDetection(connectionId, true);
+				setTimeout(() => {
+					if (self.amISpeaking) {
+						self.amISpeaking = false;
+						this.remoteUsersService.userSpeakingDetection(connectionId, false);
+					}
+				}, 3000);
+			}
+		})
 	}
 
 	onReplaceScreenTrack(event) {
@@ -553,7 +586,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	private subscribeToSpeechDetection() {
+	private subscribeToSpeechDetectionBackup() {
 		this.log.d('Subscribe to speech detection', this.session);
 		// Has been mandatory change the user zoom property here because of
 		// zoom icons and cannot handle publisherStartSpeaking event in other component
