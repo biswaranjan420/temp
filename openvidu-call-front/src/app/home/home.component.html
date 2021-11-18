@@ -57,6 +57,9 @@
                 <div class="roomError" id="shortNameError" *ngIf="isSubmitted && roomForm.hasError('minlength')">
                     Room name is <strong>too short!</strong>
                 </div>
+                <div class="roomError" id="shortNameError" *ngIf="isSubmitted && roomForm.hasError('pattern')">
+                    Room name must be Alphanumeric, it can only allowed &nbsp;_&nbsp;-
+                </div>
             </ng-container>
             <form [formGroup]="roomForm" novalidate (ngSubmit)="goToVideoCall()">
                 <div class="joinForm" *ngIf="!reJoinRoom">

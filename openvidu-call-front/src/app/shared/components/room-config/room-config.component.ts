@@ -4,7 +4,7 @@ import { UserModel } from '../../models/user-model';
 import { NicknameMatcher } from '../../forms-matchers/nickname';
 import { UtilsService } from '../../services/utils/utils.service';
 import { Publisher } from 'openvidu-browser';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { IDevice, CameraType } from '../../types/device-type';
 import { DevicesService } from '../../services/devices/devices.service';
 import { Subscription } from 'rxjs';
@@ -79,7 +79,8 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		private loggerSrv: LoggerService,
 		private storageSrv: StorageService,
 		private avatarService: AvatarService,
-		public dialog: MatDialog
+		public dialog: MatDialog,
+		private router: Router
 	) {
 		this.log = this.loggerSrv.get('RoomConfigComponent');
 
@@ -305,8 +306,16 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 	private setSessionName() {
 		this.route.params.subscribe((params: Params) => {
 			this.mySessionId = this.externalConfig ? this.externalConfig.getSessionName() : params.roomName;
-			this.tokenService.setSessionId(this.mySessionId);
+			let regex = /^[a-zA-Z0-9_-]+$/i;
+			if(!(regex.test(this.mySessionId))){
+				const message = 'Room name must be Alphanumeric, it can only allowed  _  -';
+                 alert(message);
+				 this.router.navigate(['']);
+			}else{
+				this.tokenService.setSessionId(this.mySessionId);
 			sessionStorage.setItem('MeetMonkConfRoomName', this.mySessionId);
+			}
+			
 		});
 		// Enable and update user if participants menu is true
 		this.route.queryParams.subscribe(qParams => {

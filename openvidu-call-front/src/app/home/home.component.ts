@@ -27,8 +27,9 @@ export class HomeComponent implements OnInit {
 
 	ngOnInit() {
 		this.isSubmitted = false;
+		let validPattern = "^[a-zA-Z0-9_-]+$";
 		//const randomName = uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], separator: '-', });
-		this.roomForm = new FormControl('', [Validators.minLength(4), Validators.required]);
+		this.roomForm = new FormControl('', [Validators.minLength(4), Validators.required, Validators.pattern(validPattern)]);
 		// Rejoin button code
 		this.reJoinRoom = false;
 		if (!(sessionStorage.getItem(this.reJoinRoomKey) === null)) {
