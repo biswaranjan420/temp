@@ -8,6 +8,8 @@ import { LocalUsersService } from '../local-users/local-users.service';
 import { ScreenType } from '../../types/video-type';
 import { environment } from '../../../../environments/environment';
 import { PlatformUtils } from 'openvidu-browser/lib/OpenViduInternal/Utils/Platform';
+import { DevicesService } from '../devices/devices.service';
+import { CameraType } from '../../types/device-type';
 
 @Injectable({
 	providedIn: 'root'
@@ -27,7 +29,7 @@ export class OpenViduWebrtcService implements IOpenViduWebRTC {
 
 	private log: ILogger;
 
-	constructor(private loggerSrv: LoggerService, private localUsersSrv: LocalUsersService) {
+	constructor(private loggerSrv: LoggerService, private localUsersSrv: LocalUsersService, private oVDevicesService: DevicesService) {
 		this.log = this.loggerSrv.get('OpenViduWebRTCService');
 	}
 
@@ -251,10 +253,45 @@ export class OpenViduWebrtcService implements IOpenViduWebRTC {
 			this.screenSession.unpublish(publisher);
 		}
 	}
-	publishWebcamVideo(active: boolean): void {
-		this.localUsersSrv.getWebcamPublisher().publishVideo(active);
+	 async publishWebcamVideo(active: boolean) {
+          let self = this;
+		if (!active) {
+			this.localUsersSrv.getWebcamPublisher().publishVideo(false);
+			try {
+				setTimeout(() => {
+					self.stopVideoTracks(this.localUsersSrv.getWebcamPublisher()?.stream?.getMediaStream());
+				}, 200);
+			} catch (error) {
+				
+			}
+			this.localUsersSrv.updateUsersStatus();
+		} else {
+			await this.oVDevicesService.initDevices();
+			const camSelected = this.oVDevicesService.getCamSelected();
+			const videoSource =  camSelected?.device;
+			const audioSource = false;
+			const publishAudio = false;
+			const publishVideo = false;
+			const mirror = camSelected && camSelected.type === CameraType.FRONT;
+			const properties = this.createPublisherProperties(
+				videoSource,
+				audioSource,
+				publishVideo,
+				publishAudio,
+				mirror
+			);
+			const publisher:Publisher =  await this.OV.initPublisherAsync(null, properties);
+			const videoTracks: MediaStreamTrack = publisher.stream?.getMediaStream()?.getVideoTracks()[0];
+			this.localUsersSrv.getWebcamPublisher().replaceTrack(videoTracks).then(
+				(res)=>{
+					this.localUsersSrv.getWebcamPublisher().publishVideo(true);
+					this.localUsersSrv.updateUsersStatus();
+				}
+			)		
+		}
+
 		// Send event to subscribers because of video has changed and view must update
-		this.localUsersSrv.updateUsersStatus();
+		//this.localUsersSrv.updateUsersStatus();
 	}
 	publishWebcamAudio(active: boolean): void {
 		const publisher = this.localUsersSrv.getWebcamPublisher();
@@ -441,11 +478,11 @@ export class OpenViduWebrtcService implements IOpenViduWebRTC {
 	checkScreenSharingCapabilities(): boolean {
 		return this.OV.checkScreenSharingCapabilities();
 	}
-	getScrrenUnsuportedMsg():string{
+	getScrrenUnsuportedMsg(): string {
 		const platForm = PlatformUtils.getInstance();
 		var msg = 'You can only screen share in desktop Chrome, Firefox, Opera, Safari (>=13.0), Edge (>= 80) or Electron. Detected client: ';
-		msg= msg+platForm.getName()+" ";
-		msg= msg+platForm.getVersion();
+		msg = msg + platForm.getName() + " ";
+		msg = msg + platForm.getVersion();
 		return msg;
 	}
 
