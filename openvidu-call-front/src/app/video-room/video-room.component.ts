@@ -138,8 +138,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	}
 	@HostListener('window:contextmenu',['$event'])
 	contextmenu(event: Event) {
-		//event.preventDefault();
-		//alert('This function is not allowed here.');
+		event.preventDefault();
+		alert('Right click is disabled on this screen.');
 	}
 
 	@HostListener('document:keydown.control.shift.i', ['$event'])

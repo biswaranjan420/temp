@@ -40,8 +40,8 @@ export class HomeComponent implements OnInit {
 	}
 	@HostListener('window:contextmenu',['$event'])
 	contextmenu(event: Event) {
-		// event.preventDefault();
-		// alert('This function is not allowed here.');
+		event.preventDefault();
+		alert('Right click is disabled on this screen.');
 	}
 
 	public goToVideoCall() {
