@@ -308,7 +308,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.mySessionId = this.externalConfig ? this.externalConfig.getSessionName() : params.roomName;
 			let regex = /^[a-zA-Z0-9_-]+$/i;
 			if(!(regex.test(this.mySessionId))){
-				const message = 'Room name must be Alphanumeric, it can only allowed  _  -';
+				const message = 'Invalid room name. Alphanumeric, "_" and "-" are allowed in the room name.';
                  alert(message);
 				 this.router.navigate(['']);
 			}else{

@@ -50,28 +50,42 @@
 
         </div>
         <div class="formContainer">
-            <ng-container *ngIf="!reJoinRoom">
-                <div class="roomError" id="requiredNameError" *ngIf="isSubmitted && roomForm.hasError('required')">
-                    Room name is <strong>required</strong>
-                </div>
-                <div class="roomError" id="shortNameError" *ngIf="isSubmitted && roomForm.hasError('minlength')">
-                    Room name is <strong>too short!</strong>
-                </div>
-                <div class="roomError" id="shortNameError" *ngIf="isSubmitted && roomForm.hasError('pattern')">
-                    Room name must be Alphanumeric, it can only allowed &nbsp;_&nbsp;-
-                </div>
-            </ng-container>
+
             <form [formGroup]="roomForm" novalidate (ngSubmit)="goToVideoCall()">
                 <div class="joinForm" *ngIf="!reJoinRoom">
                     <input matInput class="inputForm" type="text" [formControl]="roomForm" autocomplete="off" id="roomInput" />
                     <button type="submit" class="joinButton" id="joinButton">JOIN</button>
 
                 </div>
+                <ng-container *ngIf="!reJoinRoom">
+                    <div class="roomError" id="requiredNameError" *ngIf="isSubmitted && roomForm.hasError('required')">
+                        Room name is <strong>required</strong>
+                    </div>
+                    <div class="roomError" id="shortNameError" *ngIf="isSubmitted && roomForm.hasError('minlength')">
+                        Room name is <strong>too short!</strong>
+                    </div>
+                    <div class="roomError" id="shortNameError" *ngIf="isSubmitted && roomForm.hasError('pattern')">
+                        Invalid room name.&nbsp;
+                        <div class="tooltip">valid name
+                            <span class="tooltiptext">
+                                Alphanumeric containing
+                                <ol>
+                                    <li>a to z</li>
+                                    <li>A to Z</li>
+                                    <li>0 to 9</li>
+                                    <li>"_" and "-"</li>
+                                </ol>
+                            </span>
+                        </div>
+                    </div>
+                </ng-container>
 
                 <!-- <div class="joinForm" > -->
                 <div class="join-button-row" *ngIf="reJoinRoom">
-                    <button mat-flat-button ngClass="home-accent-btn" (click)="toogleReJoinRoomFlag()">Go to a new room</button>
-                    <button mat-flat-button ngClass="home-primary-btn" (click)="reJoinExistingSessionRoom()">Rejoin the room</button>
+                    <button mat-flat-button ngClass="home-accent-btn" (click)="toogleReJoinRoomFlag()">Go to a new
+                        room</button>
+                    <button mat-flat-button ngClass="home-primary-btn" (click)="reJoinExistingSessionRoom()">Rejoin the
+                        room</button>
 
                 </div>
                 <!-- </div> -->
