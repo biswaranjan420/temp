@@ -168,7 +168,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 
 	toggleCam() {
 		this.isVideoActive = !this.isVideoActive;
-		this.openViduWebRTCService.publishWebcamVideo(this.isVideoActive);
+		this.openViduWebRTCService.publishWebcamVideo(this.isVideoActive,'ConfigRoom');
 
 		if (this.localUsersService.areBothConnected()) {
 			this.localUsersService.disableWebcamUser();
