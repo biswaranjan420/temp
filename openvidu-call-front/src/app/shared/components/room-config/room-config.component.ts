@@ -24,6 +24,7 @@ import { AvatarService } from '../../services/avatar/avatar.service';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { DialogComponent } from '../dialog/dialog.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AuditlogService } from '../../services/auditlog/auditlog.service';
 
 @Component({
 	selector: 'app-room-config',
@@ -80,7 +81,8 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		private storageSrv: StorageService,
 		private avatarService: AvatarService,
 		public dialog: MatDialog,
-		private router: Router
+		private router: Router,
+		private auditLogService: AuditlogService
 	) {
 		this.log = this.loggerSrv.get('RoomConfigComponent');
 
@@ -108,7 +110,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.emitPublisher(null);
 			this.showConfigCard = true;
 		}
-
+		this.saveAuditLog();
 		//Set role for conf coordinator role if it is cooardinator
 	}
 
@@ -168,7 +170,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 
 	toggleCam() {
 		this.isVideoActive = !this.isVideoActive;
-		this.openViduWebRTCService.publishWebcamVideo(this.isVideoActive,'ConfigRoom');
+		this.openViduWebRTCService.publishWebcamVideo(this.isVideoActive, 'ConfigRoom');
 
 		if (this.localUsersService.areBothConnected()) {
 			this.localUsersService.disableWebcamUser();
@@ -210,9 +212,9 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				if (event && event['name'] === OpenViduErrorName.SCREEN_SHARING_NOT_SUPPORTED) {
 					this.dialogRef = this.dialog.open(DialogComponent, {
 						data: {
-							'message':event['message'],
-							'cancelBtn':false,
-							'okBtn':true
+							'message': event['message'],
+							'cancelBtn': false,
+							'okBtn': true
 						}
 					});
 				}
@@ -263,6 +265,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		this.nicknameFormControl.valueChanges.subscribe((value) => {
 			this.localUsersService.updateUsersNickname(value);
 			this.storageSrv.set(Storage.USER_NICKNAME, value);
+			this.saveAuditLog();
 		});
 	}
 
@@ -307,15 +310,15 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		this.route.params.subscribe((params: Params) => {
 			this.mySessionId = this.externalConfig ? this.externalConfig.getSessionName() : params.roomName;
 			let regex = /^[a-zA-Z0-9_-]+$/i;
-			if(!(regex.test(this.mySessionId))){
+			if (!(regex.test(this.mySessionId))) {
 				const message = 'Invalid room name. Alphanumeric, "_" and "-" are allowed in the room name.';
-                 alert(message);
-				 this.router.navigate(['']);
-			}else{
+				alert(message);
+				this.router.navigate(['']);
+			} else {
 				this.tokenService.setSessionId(this.mySessionId);
-			sessionStorage.setItem('MeetMonkConfRoomName', this.mySessionId);
+				sessionStorage.setItem('MeetMonkConfRoomName', this.mySessionId);
 			}
-			
+
 		});
 		// Enable and update user if participants menu is true
 		this.route.queryParams.subscribe(qParams => {
@@ -446,4 +449,17 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		});
 	}
 
+	private saveAuditLog() {
+		this.auditLogService.setIsAudio(!!this.micSelected?.device);
+		this.auditLogService.setIsVideo(!!this.camSelected?.device);
+		this.auditLogService.setClient(this.storageSrv.get(Storage.USER_NICKNAME));
+		this.auditLogService.save().subscribe(
+			(res) => {
+				console.log('Audit ' + res);
+			},
+			(err) => {
+				console.error(err);
+			}
+		);
+	}
 }

@@ -81,6 +81,7 @@ import { ParticipantsComponent } from './shared/components/participants/particip
 import { MatListModule } from '@angular/material/list';
 import { WhiteboardComponent } from './shared/components/whiteboard/whiteboard.component';
 import { DeviceSettingComponent } from './shared/components/device-setting/device-setting.component';
+import { AuditlogService } from './shared/services/auditlog/auditlog.service';
 
 @NgModule({
 	declarations: [
@@ -159,6 +160,7 @@ import { DeviceSettingComponent } from './shared/components/device-setting/devic
 		ChatService,
 		NotificationService,
 		StorageService,
+		AuditlogService,
 		CdkOverlayContainer,
 		{ provide: OverlayContainer, useClass: CdkOverlayContainer },
 		{provide: MAT_BOTTOM_SHEET_DEFAULT_OPTIONS, useValue: {hasBackdrop: false}}

@@ -92,7 +92,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	isWhiteboardOpened: boolean;
 	private dialogRef: MatDialogRef<DeviceSettingComponent, any>;
 	private alertDialogRef: MatDialogRef<DialogComponent, any>;
-	amISpeaking=false;
+	amISpeaking = false;
 	constructor(
 		private router: Router,
 		private utilsSrv: UtilsService,
@@ -109,6 +109,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		private bottomSheet: MatBottomSheet,
 		public dialog: MatDialog,
 		private _snackBar: MatSnackBar
+		
 	) {
 		this.log = this.loggerSrv.get('VideoRoomComponent');
 
@@ -136,10 +137,10 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.oVLayout.update();
 		this.checkSizeComponent();
 	}
-	@HostListener('window:contextmenu',['$event'])
+	@HostListener('window:contextmenu', ['$event'])
 	contextmenu(event: Event) {
-		event.preventDefault();
-		alert('Right click is disabled on this screen.');
+		//event.preventDefault();
+		//alert('Right click is disabled on this screen.');
 	}
 
 	@HostListener('document:keydown.control.shift.i', ['$event'])
@@ -147,7 +148,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		event.preventDefault();
 		alert('This function is not allowed here.');
 	}
-	
+
 	async ngOnInit() {
 		this.localUsersService.initialize();
 		this.openViduWebRTCService.initialize();
@@ -155,6 +156,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.lightTheme = this.externalConfig?.getTheme() === Theme.LIGHT;
 		this.ovSettings = !!this.externalConfig ? this.externalConfig.getOvSettings() : new OvSettingsModel();
 		this.ovSettings.setScreenSharing(this.ovSettings.hasScreenSharing() && !this.utilsSrv.isMobile());
+
 	}
 
 	ngOnDestroy() {
@@ -593,10 +595,10 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.session.on('publisherStartSpeaking', (event: PublisherSpeakingEvent) => {
 			const someoneIsSharingScreen = this.remoteUsersService.someoneIsSharingScreen();
 			if (!this.localUsersService.isScreenShareEnabled() && !someoneIsSharingScreen) {
-				let self=this;
+				let self = this;
 				this.amISpeaking = true;
 				setTimeout(() => {
-					if(self.amISpeaking){
+					if (self.amISpeaking) {
 						self.amISpeaking = false;
 					}
 				}, 4000);
