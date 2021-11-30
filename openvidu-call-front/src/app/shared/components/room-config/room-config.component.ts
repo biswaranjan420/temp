@@ -450,6 +450,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 	}
 
 	private saveAuditLog() {
+		this.auditLogService.initialize();
 		this.auditLogService.setIsAudio(!!this.micSelected?.device);
 		this.auditLogService.setIsVideo(!!this.camSelected?.device);
 		this.auditLogService.setClient(this.storageSrv.get(Storage.USER_NICKNAME));

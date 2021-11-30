@@ -12,13 +12,12 @@ export class AuditlogService {
   constructor(
     private http: HttpClient
   ) {
-    this.initialize();
     if (environment.production) {
       this.URL = 'https://configvc.meetmonk.com/MeetmonkVCAuditLog/api/rsbcihi/save';
     }
   }
 
-  private initialize() {
+  public initialize() {
     this.auditLog = new Auditlog();
   }
   public setIsAudio(value: boolean) {
