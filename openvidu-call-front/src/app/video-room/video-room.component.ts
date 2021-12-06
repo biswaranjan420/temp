@@ -42,6 +42,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToolbarComponent } from '../shared/components/toolbar/toolbar.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogComponent } from '../shared/components/dialog/dialog.component';
+import { AuditlogService } from '../shared/services/auditlog/auditlog.service';
+import { CustomSessionEvent } from '../shared/models/auditlog';
 
 
 @Component({
@@ -93,6 +95,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	private dialogRef: MatDialogRef<DeviceSettingComponent, any>;
 	private alertDialogRef: MatDialogRef<DialogComponent, any>;
 	amISpeaking = false;
+	customSessionEvent: CustomSessionEvent;
+	sessionEventObject: CustomSessionEvent;
 	constructor(
 		private router: Router,
 		private utilsSrv: UtilsService,
@@ -108,8 +112,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		private whiteboardSrv: WhiteboardService,
 		private bottomSheet: MatBottomSheet,
 		public dialog: MatDialog,
-		private _snackBar: MatSnackBar
-		
+		private _snackBar: MatSnackBar,
+		private auditLogService: AuditlogService
+
 	) {
 		this.log = this.loggerSrv.get('VideoRoomComponent');
 
@@ -150,12 +155,16 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	}
 
 	async ngOnInit() {
+		this.sessionEventObject = new CustomSessionEvent();
 		this.localUsersService.initialize();
 		this.openViduWebRTCService.initialize();
-
+		this.auditLogService.initialize();
 		this.lightTheme = this.externalConfig?.getTheme() === Theme.LIGHT;
 		this.ovSettings = !!this.externalConfig ? this.externalConfig.getOvSettings() : new OvSettingsModel();
 		this.ovSettings.setScreenSharing(this.ovSettings.hasScreenSharing() && !this.utilsSrv.isMobile());
+		const auditLog = this.auditLogService.getAuditLog();
+		const roomData = await this.auditLogService.getRoomId(auditLog?.sessionId);
+		this.auditLogService.setRoomId(roomData['roomId']);
 
 	}
 
@@ -189,7 +198,31 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 
 	}
+	onConfigReady(event: CustomSessionEvent) {
+		if (event?.event === 'sessionConfig') {
+			this.customSessionEvent = event;
+		}
+		this.auditLogService.setEvent(event?.event);
+		let currentResourceNews = event?.resourceNews;
+		if (currentResourceNews == undefined || currentResourceNews == '') {
+			currentResourceNews = this.customSessionEvent?.resourceNews;
+		}
+		this.auditLogService.setResourceNews(currentResourceNews);
+		this.setAuditLogPropert();
+		this.auditLogService.save().subscribe(
+			(res) => {
+				console.log(res);
+			}
+		);
 
+	}
+	setAuditLogPropert() {
+		this.auditLogService.setHasAudio(this.oVDevicesService.hasAudioDeviceAvailable());
+		this.auditLogService.setHasVideo(this.oVDevicesService.hasVideoDeviceAvailable());
+		this.auditLogService.setAudioSource(this.oVDevicesService.getMicSelected()?.label);
+		this.auditLogService.setVideoSource(this.oVDevicesService.getCamSelected()?.label);
+		this.auditLogService.setUserName(this.storageSrv.get(Storage.USER_NICKNAME));
+	}
 	onConfigRoomJoin() {
 		this.hasVideoDevices = this.oVDevicesService.hasVideoDeviceAvailable();
 		this.hasAudioDevices = this.oVDevicesService.hasAudioDeviceAvailable();
@@ -235,6 +268,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	leaveSession() {
 		this.log.d('Leaving session...');
 		this.openViduWebRTCService.disconnect();
+		this.sessionEventObject.event = 'participantLeft';
+		this.onConfigReady(this.sessionEventObject);
+		this.auditLogService.reset();
 		this.router.navigate(['']);
 		this._leaveSession.emit();
 	}
@@ -512,6 +548,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	private subscribeToConnectionCreatedAndDestroyed() {
 		this.session.on('connectionCreated', (event: ConnectionEvent) => {
 			if (this.openViduWebRTCService.isMyOwnConnection(event.connection.connectionId)) {
+				this.sessionEventObject.event = 'participantJoined';
+				this.onConfigReady(this.sessionEventObject);
 				return;
 			}
 
@@ -527,6 +565,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 		this.session.on('connectionDestroyed', (event: ConnectionEvent) => {
 			if (this.openViduWebRTCService.isMyOwnConnection(event.connection.connectionId)) {
+				this.sessionEventObject.event = 'participantLeft';
+				this.onConfigReady(this.sessionEventObject);
+
 				return;
 			}
 			this.remoteUsersService.deleteUserName(event);
@@ -543,6 +584,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			const connectionId = event.stream.connection.connectionId;
 
 			if (this.openViduWebRTCService.isMyOwnConnection(connectionId)) {
+				this.sessionEventObject.event = 'participantJoined';
+				this.onConfigReady(this.sessionEventObject);
+
 				return;
 			}
 
@@ -556,6 +600,10 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.session.on('streamDestroyed', (event: StreamEvent) => {
 			const connectionId = event.stream.connection.connectionId;
 			this.remoteUsersService.removeUserByConnectionId(connectionId);
+			if (this.openViduWebRTCService.isMyOwnConnection(connectionId)) {
+				this.sessionEventObject.event = 'participantLeft';
+				this.onConfigReady(this.sessionEventObject);
+			}
 			// event.preventDefault();
 		});
 	}
@@ -627,16 +675,23 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.session.on('reconnecting', () => {
 			this.log.w('Connection lost: Reconnecting');
 			this.isConnectionLost = true;
+			this.sessionEventObject.event = 'reconnecting';
+			this.onConfigReady(this.sessionEventObject);
 			this.utilsSrv.showErrorMessage('Connection Problem', 'Oops! Trying to reconnect to the session ...', true);
 		});
 		this.session.on('reconnected', () => {
 			this.log.w('Connection lost: Reconnected');
 			this.isConnectionLost = false;
+			this.sessionEventObject.event = 'reconnected';
+			this.onConfigReady(this.sessionEventObject);
+
 			this.utilsSrv.closeDialog();
 		});
 		this.session.on('sessionDisconnected', (event: SessionDisconnectedEvent) => {
 			if (event.reason === 'networkDisconnect') {
 				this.utilsSrv.closeDialog();
+				this.sessionEventObject.event = 'networkDisconnect';
+				this.onConfigReady(this.sessionEventObject);
 				this.leaveSession();
 			}
 		});

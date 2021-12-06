@@ -25,6 +25,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { DialogComponent } from '../dialog/dialog.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AuditlogService } from '../../services/auditlog/auditlog.service';
+import { CustomSessionEvent } from '../../models/auditlog';
 
 @Component({
 	selector: 'app-room-config',
@@ -41,7 +42,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 
 	// Webcomponent event
 	@Output() publisherCreated = new EventEmitter<any>();
-
+	@Output() configReady = new EventEmitter<any>();
 	mySessionId: string;
 
 	cameras: IDevice[];
@@ -70,6 +71,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 	captuteButtonLabel = 'Capture';
 	breakpoint: number;
 	private dialogRef: MatDialogRef<DialogComponent, any>;
+	sessionEventObject: CustomSessionEvent;
 	constructor(
 		private route: ActivatedRoute,
 		private utilsSrv: UtilsService,
@@ -81,8 +83,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		private storageSrv: StorageService,
 		private avatarService: AvatarService,
 		public dialog: MatDialog,
-		private router: Router,
-		private auditLogService: AuditlogService
+		private router: Router
 	) {
 		this.log = this.loggerSrv.get('RoomConfigComponent');
 
@@ -94,23 +95,42 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 	}
 
 	async ngOnInit() {
-		this.isMobile = window.orientation > -1;
-		this.breakpoint = (window.innerWidth <= 767) ? 1 : 2;
-		this.subscribeToLocalUsersEvents();
-		this.initNicknameAndSubscribeToChanges();
-		this.openviduAvatar = this.avatarService.getOpenViduAvatar();
-		this.columns = window.innerWidth > 900 ? 2 : 1;
-		this.setSessionName();
-		await this.oVDevicesService.initDevices();
-		this.setDevicesInfo();
-		if (this.hasAudioDevices || this.hasVideoDevices) {
-			await this.initwebcamPublisher();
-		} else {
-			// Emit publisher to webcomponent and angular-library
-			this.emitPublisher(null);
-			this.showConfigCard = true;
+		try {
+			this.isMobile = window.orientation > -1;
+			this.breakpoint = (window.innerWidth <= 767) ? 1 : 2;
+			this.sessionEventObject = new CustomSessionEvent();
+			this.subscribeToLocalUsersEvents();
+			this.initNicknameAndSubscribeToChanges();
+			this.openviduAvatar = this.avatarService.getOpenViduAvatar();
+			this.columns = window.innerWidth > 900 ? 2 : 1;
+			this.setSessionName();
+			await this.oVDevicesService.initDevices();
+			this.setDevicesInfo();
+			if (this.hasAudioDevices || this.hasVideoDevices) {
+				await this.initwebcamPublisher();
+			} else {
+				// Emit publisher to webcomponent and angular-library
+				this.emitPublisher(null);
+				this.showConfigCard = true;
+			}
+			this.sessionEventObject.resourceNews = 'All system resources are working as expected';
+			this.configReady.emit(this.sessionEventObject);
+		} catch (error) {
+			if (OpenViduErrorName.DEVICE_ALREADY_IN_USE===error['name']) {
+				this.sessionEventObject.resourceNews='Video device already in use. so Camera is off'
+				this.configReady.emit(this.sessionEventObject);
+			}
+			if (OpenViduErrorName.DEVICE_ACCESS_DENIED===error['name']) {
+				this.sessionEventObject.resourceNews='Access to media devices was not allowed.'
+				this.configReady.emit(this.sessionEventObject);
+			}
+			if (OpenViduErrorName.NO_INPUT_SOURCE_SET===error['name']) {
+				this.sessionEventObject.resourceNews='No video or audio devices have been found.'
+				this.configReady.emit(this.sessionEventObject);
+			}
+			console.error(error);
 		}
-		this.saveAuditLog();
+		//this.configReady.emit('sessionConfig');
 		//Set role for conf coordinator role if it is cooardinator
 	}
 
@@ -265,7 +285,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		this.nicknameFormControl.valueChanges.subscribe((value) => {
 			this.localUsersService.updateUsersNickname(value);
 			this.storageSrv.set(Storage.USER_NICKNAME, value);
-			this.saveAuditLog();
+			this.configReady.emit(this.sessionEventObject);
 		});
 	}
 
@@ -419,6 +439,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				this.setDevicesInfo();
 			}
 			// Emit publisher to webcomponent and angular-library
+
 			this.emitPublisher(publisher);
 
 			if (this.ovSettings.isAutoPublish()) {
@@ -437,6 +458,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				// Allow access to the room with only mic if camera device is already in use
 				this.hasVideoDevices = false;
 				this.oVDevicesService.disableVideoDevices();
+
 				return this.initwebcamPublisher();
 			}
 			if (e.name === OpenViduErrorName.DEVICE_ACCESS_DENIED) {
@@ -449,18 +471,6 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	private saveAuditLog() {
-		this.auditLogService.initialize();
-		this.auditLogService.setIsAudio(!!this.micSelected?.device);
-		this.auditLogService.setIsVideo(!!this.camSelected?.device);
-		this.auditLogService.setClient(this.storageSrv.get(Storage.USER_NICKNAME));
-		this.auditLogService.save().subscribe(
-			(res) => {
-				console.log('Audit ' + res);
-			},
-			(err) => {
-				console.error(err);
-			}
-		);
-	}
+
 }
+

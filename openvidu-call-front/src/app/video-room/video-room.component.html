@@ -1,5 +1,5 @@
 <div *ngIf="!!ovSettings" id="videoRoomNavBar" [class.boundsLight]="lightTheme">
-    <app-room-config *ngIf="showConfigRoomCard" [ovSettings]="ovSettings" [externalConfig]="externalConfig" (join)="onConfigRoomJoin()" (leaveSession)="leaveSession()" (publisherCreated)="emitPublisher($event)"></app-room-config>
+    <app-room-config *ngIf="showConfigRoomCard" [ovSettings]="ovSettings" [externalConfig]="externalConfig" (join)="onConfigRoomJoin()" (leaveSession)="leaveSession()" (publisherCreated)="emitPublisher($event)" (configReady)="onConfigReady($event)"></app-room-config>
 
     <div *ngIf="localUsers && localUsers.length > 0">
         <div *ngIf="isConnectionLost" class="reconnecting-container"></div>
