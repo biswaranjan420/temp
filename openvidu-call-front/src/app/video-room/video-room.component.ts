@@ -162,10 +162,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.lightTheme = this.externalConfig?.getTheme() === Theme.LIGHT;
 		this.ovSettings = !!this.externalConfig ? this.externalConfig.getOvSettings() : new OvSettingsModel();
 		this.ovSettings.setScreenSharing(this.ovSettings.hasScreenSharing() && !this.utilsSrv.isMobile());
-		const auditLog = this.auditLogService.getAuditLog();
-		const roomData = await this.auditLogService.getRoomId(auditLog?.sessionId);
-		this.auditLogService.setRoomId(roomData['roomId']);
-
+		
+		
 	}
 
 	ngOnDestroy() {
@@ -222,6 +220,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.auditLogService.setAudioSource(this.oVDevicesService.getMicSelected()?.label);
 		this.auditLogService.setVideoSource(this.oVDevicesService.getCamSelected()?.label);
 		this.auditLogService.setUserName(this.storageSrv.get(Storage.USER_NICKNAME));
+		this.auditLogService.setSessionId(sessionStorage.getItem('MeetMonkConfRoomName'));
 	}
 	onConfigRoomJoin() {
 		this.hasVideoDevices = this.oVDevicesService.hasVideoDeviceAvailable();

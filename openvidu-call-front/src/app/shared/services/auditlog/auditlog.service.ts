@@ -49,15 +49,18 @@ export class AuditlogService {
   public setUserName(name: string) {
     this.auditLog.userName = name;
   }
+  public setSessionId(sessionId:string) {
+    this.auditLog.sessionId = sessionId;
+  }
   public reset(): void {
     this.auditLog = null;
   }
   public save(): Observable<any> {
     try {
-    
+
       return this.http.post(this.URL + '/save', this.auditLog);
     } catch (error) {
-     // console.error(error);
+      // console.error(error);
     }
   }
   getRoomId(sessionId: string) {

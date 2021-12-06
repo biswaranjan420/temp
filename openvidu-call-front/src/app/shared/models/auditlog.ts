@@ -14,7 +14,6 @@ export class Auditlog {
     resourceNews:string;
     
     constructor() {
-        this.sessionId = sessionStorage.getItem('MeetMonkConfRoomName');
         this.userId = Date.now().toString(36) + Math.random().toString(36).substr(2);
         this.platform = this.browserName();
     }

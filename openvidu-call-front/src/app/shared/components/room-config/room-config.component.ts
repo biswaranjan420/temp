@@ -83,7 +83,8 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		private storageSrv: StorageService,
 		private avatarService: AvatarService,
 		public dialog: MatDialog,
-		private router: Router
+		private router: Router,
+		private auditLogService: AuditlogService
 	) {
 		this.log = this.loggerSrv.get('RoomConfigComponent');
 
@@ -104,6 +105,8 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.openviduAvatar = this.avatarService.getOpenViduAvatar();
 			this.columns = window.innerWidth > 900 ? 2 : 1;
 			this.setSessionName();
+			const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
+			this.auditLogService.setRoomId(roomData['roomId']);
 			await this.oVDevicesService.initDevices();
 			this.setDevicesInfo();
 			if (this.hasAudioDevices || this.hasVideoDevices) {
@@ -115,6 +118,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			}
 			this.sessionEventObject.resourceNews = 'All system resources are working as expected';
 			this.configReady.emit(this.sessionEventObject);
+			
 		} catch (error) {
 			if (OpenViduErrorName.DEVICE_ALREADY_IN_USE===error['name']) {
 				this.sessionEventObject.resourceNews='Video device already in use. so Camera is off'
