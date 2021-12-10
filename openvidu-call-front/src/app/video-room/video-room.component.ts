@@ -138,6 +138,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		if (!this.showConfigRoomCard) {
 			this.leaveSession();
 		}
+		this.sessionEventObject.event = 'participantLeft';
+		this.onConfigReady(this.sessionEventObject);
 	}
 
 	@HostListener('window:resize')
@@ -333,19 +335,23 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			this.openViduWebRTCService.publishWebcamVideo(false);
 		}
 		this.subscribeToNetwrkSpeedTest('joinToSession');
+
 	}
 
 	leaveSession() {
 		this.log.d('Leaving session...');
 		this.openViduWebRTCService.disconnect();
+		this.auditLogService.reset();
+		this.router.navigate(['']);
+		this._leaveSession.emit();
+	}
+	leaveSessionClicked() {
 		this.sessionEventObject.event = 'participantLeft';
 		this.onConfigReady(this.sessionEventObject);
 		if (this.intervalNetworkSpeed$) {
 			clearTimeout(this.intervalNetworkSpeed$);
 		}
-		this.auditLogService.reset();
-		this.router.navigate(['']);
-		this._leaveSession.emit();
+		this.leaveSession();
 	}
 
 	onNicknameUpdate(nickname: string) {
@@ -365,29 +371,25 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 	async toggleCam() {
 		const publishVideo = !this.localUsersService.hasWebcamVideoActive();
-
 		// Disabling webcam
-		// if (this.localUsersService.areBothConnected()) {
-		// 	this.openViduWebRTCService.publishWebcamVideo(publishVideo);
-		// 	this.localUsersService.disableWebcamUser();
-		// 	this.openViduWebRTCService.unpublishWebcamPublisher();
-		// 	 await this.mergeAudioTrackIfScreenPublished();
-		// 	return;
-		// }
+		if (this.localUsersService.areBothConnected()) {
+			this.openViduWebRTCService.publishWebcamVideo(publishVideo);
+			this.localUsersService.disableWebcamUser();
+			this.openViduWebRTCService.unpublishWebcamPublisher();
+			return;
+		}
 		// Enabling webcam
-		// if (this.localUsersService.isOnlyScreenConnected()) {
-		// 	const hasAudio = this.localUsersService.hasScreenAudioActive();
+		if (this.localUsersService.isOnlyScreenConnected()) {
+			const hasAudio = this.localUsersService.hasScreenAudioActive();
 
-		// 	if (!this.openViduWebRTCService.isWebcamSessionConnected()) {
-		// 		await this.connectWebcamSession();
-		// 	}
-
-		// 	await this.openViduWebRTCService.publishWebcamPublisher();
-		// 	this.openViduWebRTCService.publishScreenAudio(false);
-		// 	this.openViduWebRTCService.publishWebcamAudio(hasAudio);
-		// 	this.localUsersService.enableWebcamUser();
-		// 	await this.mergeAudioTrackIfScreenPublished();
-		// }
+			if (!this.openViduWebRTCService.isWebcamSessionConnected()) {
+				await this.connectWebcamSession();
+			}
+			await this.openViduWebRTCService.publishWebcamPublisher();
+			this.openViduWebRTCService.publishScreenAudio(false);
+			this.openViduWebRTCService.publishWebcamAudio(hasAudio);
+			this.localUsersService.enableWebcamUser();
+		}
 		// Muting/unmuting webcam
 		this.openViduWebRTCService.publishWebcamVideo(publishVideo);
 	}
@@ -468,7 +470,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		}
 
 		// Disabling screnShare and enabling webcam
-		alert('error on toggle Screen Share')
+		//alert('error on toggle Screen Share')
 		const hasAudio = this.localUsersService.hasScreenAudioActive();
 		await this.openViduWebRTCService.publishWebcamPublisher();
 		this.openViduWebRTCService.publishScreenAudio(false);
@@ -596,6 +598,10 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 		this.oVLayout.update();
 
+		// Audit Logs For Joined
+		this.sessionEventObject.event = 'participantJoined';
+		this.onConfigReady(this.sessionEventObject);
+
 	}
 
 	private async connectScreenSession() {
@@ -621,8 +627,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	private subscribeToConnectionCreatedAndDestroyed() {
 		this.session.on('connectionCreated', (event: ConnectionEvent) => {
 			if (this.openViduWebRTCService.isMyOwnConnection(event.connection.connectionId)) {
-				this.sessionEventObject.event = 'participantJoined';
-				this.onConfigReady(this.sessionEventObject);
+				// this.sessionEventObject.event = 'participantJoined';
+				// this.onConfigReady(this.sessionEventObject);
 				return;
 			}
 
@@ -638,8 +644,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 		this.session.on('connectionDestroyed', (event: ConnectionEvent) => {
 			if (this.openViduWebRTCService.isMyOwnConnection(event.connection.connectionId)) {
-				this.sessionEventObject.event = 'participantLeft';
-				this.onConfigReady(this.sessionEventObject);
+				// this.sessionEventObject.event = 'participantLeft';
+				// this.onConfigReady(this.sessionEventObject);
 
 				return;
 			}
@@ -657,8 +663,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			const connectionId = event.stream.connection.connectionId;
 
 			if (this.openViduWebRTCService.isMyOwnConnection(connectionId)) {
-				this.sessionEventObject.event = 'participantJoined';
-				this.onConfigReady(this.sessionEventObject);
+
 
 				return;
 			}
@@ -674,8 +679,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			const connectionId = event.stream.connection.connectionId;
 			this.remoteUsersService.removeUserByConnectionId(connectionId);
 			if (this.openViduWebRTCService.isMyOwnConnection(connectionId)) {
-				this.sessionEventObject.event = 'participantLeft';
-				this.onConfigReady(this.sessionEventObject);
+
 			}
 			// event.preventDefault();
 		});

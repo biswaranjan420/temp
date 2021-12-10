@@ -253,49 +253,10 @@ export class OpenViduWebrtcService implements IOpenViduWebRTC {
 			this.screenSession.unpublish(publisher);
 		}
 	}
-	 async publishWebcamVideo(active: boolean, callingPlace='VideoRoom') {
-		let self = this;
-		if(callingPlace ==='ConfigRoom'){
-			this.localUsersSrv.getWebcamPublisher().publishVideo(active);
-			this.localUsersSrv.updateUsersStatus();
-			return;
-		}
-		
-		if (!active) {
-			this.localUsersSrv.getWebcamPublisher().publishVideo(false);
-			try {
-				setTimeout(() => {
-					self.stopVideoTracks(this.localUsersSrv.getWebcamPublisher()?.stream?.getMediaStream());
-				}, 200);
-			} catch (error) {
-
-			}
-			this.localUsersSrv.updateUsersStatus();
-		} else {
-			await this.oVDevicesService.initDevices();
-			const camSelected = this.oVDevicesService.getCamSelected();
-			const videoSource = camSelected?.device;
-			const audioSource = false;
-			const publishAudio = false;
-			const publishVideo = false;
-			const mirror = camSelected && camSelected.type === CameraType.FRONT;
-			const properties = this.createPublisherProperties(
-				videoSource,
-				audioSource,
-				publishVideo,
-				publishAudio,
-				mirror
-			);
-			const publisher = await this.OV.getUserMedia(properties);
-			const videoTracks: MediaStreamTrack = publisher?.getVideoTracks()[0];
-			this.localUsersSrv.getWebcamPublisher().replaceTrack(videoTracks).then(
-				(res) => {
-					this.localUsersSrv.getWebcamPublisher().publishVideo(true);
-					//this.localUsersSrv.getWebcamPublisher().publishAudio(this.localUsersSrv.hasWebcamAudioActive());
-					this.localUsersSrv.updateUsersStatus();
-				}
-			)
-		}
+	async publishWebcamVideo(active: boolean) {
+		this.localUsersSrv.getWebcamPublisher().publishVideo(active);
+		// Send event to subscribers because of video has changed and view must update
+		this.localUsersSrv.updateUsersStatus();
 	}
 	publishWebcamAudio(active: boolean): void {
 		const publisher = this.localUsersSrv.getWebcamPublisher();
