@@ -140,6 +140,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		}
 		this.sessionEventObject.event = 'participantLeft';
 		this.onConfigReady(this.sessionEventObject);
+		if (this.intervalNetworkSpeed$) {
+			clearTimeout(this.intervalNetworkSpeed$);
+		}
 	}
 
 	@HostListener('window:resize')
@@ -254,7 +257,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 					console.log(res);
 					_self.intervalNetworkSpeed$ = setTimeout(() => {
 						_self.subscribeToNetwrkSpeedTest('joinToSession');
-					}, 10000);
+					}, 5000);
 				},
 				(err) => {
 					console.error(err);
@@ -281,7 +284,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 					resolve(Math.floor(speed));
 				},
 				(err) => {
-					reject(err);
+					resolve(Math.floor(0));
 				}
 			);
 		});

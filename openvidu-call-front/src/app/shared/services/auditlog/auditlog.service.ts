@@ -58,9 +58,7 @@ export class AuditlogService {
     this.auditLog = null;
   }
   public save(): Observable<any> {
-    if (!environment.production) {
-         return of({'save':'save'});
-    }
+   
     try {
 
       return this.http.post(this.URL + '/save', this.auditLog);
@@ -69,9 +67,7 @@ export class AuditlogService {
     }
   }
   getRoomId(sessionId: string) {
-    if (!environment.production) {
-      return of({'roomId':''});
-    }
+    
     const httpOptions = {
       headers: new HttpHeaders({
         'instancename': 'MEETMONK_RSBCIHI_VC',
