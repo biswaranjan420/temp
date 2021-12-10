@@ -105,8 +105,13 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.openviduAvatar = this.avatarService.getOpenViduAvatar();
 			this.columns = window.innerWidth > 900 ? 2 : 1;
 			this.setSessionName();
-			const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
-			this.auditLogService.setRoomId(roomData['roomId']);
+			try {
+				const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
+				this.auditLogService.setRoomId(roomData['roomId']);
+			} catch (error) {
+
+			}
+
 			await this.oVDevicesService.initDevices();
 			this.setDevicesInfo();
 			if (this.hasAudioDevices || this.hasVideoDevices) {
@@ -118,18 +123,18 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			}
 			this.sessionEventObject.resourceNews = 'All system resources are working as expected';
 			this.configReady.emit(this.sessionEventObject);
-			
+
 		} catch (error) {
-			if (OpenViduErrorName.DEVICE_ALREADY_IN_USE===error['name']) {
-				this.sessionEventObject.resourceNews='Video device already in use. so Camera is off'
+			if (OpenViduErrorName.DEVICE_ALREADY_IN_USE === error['name']) {
+				this.sessionEventObject.resourceNews = 'Video device already in use. so Camera is off'
 				this.configReady.emit(this.sessionEventObject);
 			}
-			if (OpenViduErrorName.DEVICE_ACCESS_DENIED===error['name']) {
-				this.sessionEventObject.resourceNews='Access to media devices was not allowed.'
+			if (OpenViduErrorName.DEVICE_ACCESS_DENIED === error['name']) {
+				this.sessionEventObject.resourceNews = 'Access to media devices was not allowed.'
 				this.configReady.emit(this.sessionEventObject);
 			}
-			if (OpenViduErrorName.NO_INPUT_SOURCE_SET===error['name']) {
-				this.sessionEventObject.resourceNews='No video or audio devices have been found.'
+			if (OpenViduErrorName.NO_INPUT_SOURCE_SET === error['name']) {
+				this.sessionEventObject.resourceNews = 'No video or audio devices have been found.'
 				this.configReady.emit(this.sessionEventObject);
 			}
 			console.error(error);

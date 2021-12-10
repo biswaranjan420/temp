@@ -44,6 +44,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogComponent } from '../shared/components/dialog/dialog.component';
 import { AuditlogService } from '../shared/services/auditlog/auditlog.service';
 import { CustomSessionEvent } from '../shared/models/auditlog';
+import { SpeedTestService } from 'ng-speed-test';
 
 
 @Component({
@@ -97,6 +98,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	amISpeaking = false;
 	customSessionEvent: CustomSessionEvent;
 	sessionEventObject: CustomSessionEvent;
+	intervalNetworkSpeed$: any;
 	constructor(
 		private router: Router,
 		private utilsSrv: UtilsService,
@@ -113,7 +115,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		private bottomSheet: MatBottomSheet,
 		public dialog: MatDialog,
 		private _snackBar: MatSnackBar,
-		private auditLogService: AuditlogService
+		private auditLogService: AuditlogService,
+		private speedTestService: SpeedTestService
 
 	) {
 		this.log = this.loggerSrv.get('VideoRoomComponent');
@@ -162,8 +165,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.lightTheme = this.externalConfig?.getTheme() === Theme.LIGHT;
 		this.ovSettings = !!this.externalConfig ? this.externalConfig.getOvSettings() : new OvSettingsModel();
 		this.ovSettings.setScreenSharing(this.ovSettings.hasScreenSharing() && !this.utilsSrv.isMobile());
-		
-		
+
+
 	}
 
 	ngOnDestroy() {
@@ -193,7 +196,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			this.bottomSheet.dismiss();
 			this.bottomSheet.ngOnDestroy();
 		}
-
+		if (this.intervalNetworkSpeed$) {
+			clearTimeout(this.intervalNetworkSpeed$);
+		}
 
 	}
 	onConfigReady(event: CustomSessionEvent) {
@@ -207,12 +212,77 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		}
 		this.auditLogService.setResourceNews(currentResourceNews);
 		this.setAuditLogPropert();
+		if (event?.event === 'sessionConfig') {
+			this.subscribeToNetwrkSpeedTest('sessionConfig');
+		}
 		this.auditLogService.save().subscribe(
 			(res) => {
 				console.log(res);
+			},
+			(err) => {
+				console.error(err);
 			}
 		);
 
+	}
+	async subscribeToNetwrkSpeedTest(ev: string) {
+		console.log('--------------: ' + ev);
+		if (ev === 'sessionConfig') {
+			let _self = this;
+			const speed: any = await this.getNetSpeed();
+			this.auditLogService.setEvent('NetworkSpeed');
+			this.auditLogService.setSpeed(speed);
+			this.auditLogService.save().subscribe(
+				(res) => {
+					console.log(res);
+				},
+				(err) => {
+					console.error(err);
+				}
+
+			);
+		}
+		if (ev === 'joinToSession') {
+			let _self = this;
+			const speed: any = await this.getNetSpeed();
+			this.auditLogService.setEvent('NetworkSpeed');
+			this.auditLogService.setSpeed(speed);
+			this.auditLogService.save().subscribe(
+				(res) => {
+					console.log(res);
+					_self.intervalNetworkSpeed$ = setTimeout(() => {
+						_self.subscribeToNetwrkSpeedTest('joinToSession');
+					}, 10000);
+				},
+				(err) => {
+					console.error(err);
+				}
+
+			);
+		}
+
+
+	}
+	getNetSpeed() {
+		return new Promise((resolve, reject) => {
+			this.speedTestService.getMbps(
+				{
+					iterations: 1,
+					file: {
+						path: 'https://raw.githubusercontent.com/jrquick17/ng-speed-test/02c59e4afde67c35a5ba74014b91d44b33c0b3fe/demo/src/assets/1mb.jpg',
+						size: 1197292,
+						shouldBustCache: true
+					}
+				}
+			).subscribe(
+				(speed) => {
+					resolve(Math.floor(speed));
+				},
+				(err) => {
+					reject(err);
+				}
+			);
+		});
 	}
 	setAuditLogPropert() {
 		this.auditLogService.setHasAudio(this.oVDevicesService.hasAudioDeviceAvailable());
@@ -262,6 +332,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			this.openViduWebRTCService.publishWebcamVideo(true);
 			this.openViduWebRTCService.publishWebcamVideo(false);
 		}
+		this.subscribeToNetwrkSpeedTest('joinToSession');
 	}
 
 	leaveSession() {
@@ -269,6 +340,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.openViduWebRTCService.disconnect();
 		this.sessionEventObject.event = 'participantLeft';
 		this.onConfigReady(this.sessionEventObject);
+		if (this.intervalNetworkSpeed$) {
+			clearTimeout(this.intervalNetworkSpeed$);
+		}
 		this.auditLogService.reset();
 		this.router.navigate(['']);
 		this._leaveSession.emit();

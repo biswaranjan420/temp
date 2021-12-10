@@ -8,7 +8,6 @@ import { Auditlog } from '../../models/auditlog';
   providedIn: 'root'
 })
 export class AuditlogService {
-
   auditLog: Auditlog;
   private URL = 'http://localhost:8080/api/rsbcihi';
   constructor(
@@ -49,13 +48,19 @@ export class AuditlogService {
   public setUserName(name: string) {
     this.auditLog.userName = name;
   }
-  public setSessionId(sessionId:string) {
+  public setSessionId(sessionId: string) {
     this.auditLog.sessionId = sessionId;
+  }
+  public setSpeed(speed: string) {
+    this.auditLog.networkSpeed = speed;
   }
   public reset(): void {
     this.auditLog = null;
   }
   public save(): Observable<any> {
+    // if (!environment.production) {
+    //      return of({'save':'save'});
+    // }
     try {
 
       return this.http.post(this.URL + '/save', this.auditLog);
@@ -64,6 +69,9 @@ export class AuditlogService {
     }
   }
   getRoomId(sessionId: string) {
+    // if (!environment.production) {
+    //   return of({'roomId':''});
+    // }
     const httpOptions = {
       headers: new HttpHeaders({
         'instancename': 'MEETMONK_RSBCIHI_VC',

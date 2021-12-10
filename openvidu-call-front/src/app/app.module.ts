@@ -82,6 +82,7 @@ import { MatListModule } from '@angular/material/list';
 import { WhiteboardComponent } from './shared/components/whiteboard/whiteboard.component';
 import { DeviceSettingComponent } from './shared/components/device-setting/device-setting.component';
 import { AuditlogService } from './shared/services/auditlog/auditlog.service';
+import { SpeedTestModule } from 'ng-speed-test';
 
 @NgModule({
 	declarations: [
@@ -146,7 +147,8 @@ import { AuditlogService } from './shared/services/auditlog/auditlog.service';
 		HttpClientModule,
 		FlexLayoutModule,
 		MatMenuModule,
-		PickerModule
+		PickerModule,
+		SpeedTestModule
 	],
 	entryComponents: [DialogErrorComponent, WebComponentComponent],
 	providers: [

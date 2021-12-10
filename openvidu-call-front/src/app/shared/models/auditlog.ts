@@ -11,8 +11,9 @@ export class Auditlog {
     hasCamera: boolean;
     audioSource: string;
     videoSource: string;
-    resourceNews:string;
-    
+    resourceNews: string;
+    networkSpeed: string;
+
     constructor() {
         this.userId = Date.now().toString(36) + Math.random().toString(36).substr(2);
         this.platform = this.browserName();
@@ -25,9 +26,9 @@ export class Auditlog {
 }
 
 export class CustomSessionEvent {
-	event: string;
-	resourceNews: string;
-	constructor() {
-		this.event = 'sessionConfig';
-	}
+    event: string;
+    resourceNews: string;
+    constructor() {
+        this.event = 'sessionConfig';
+    }
 }

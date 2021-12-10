@@ -15,6 +15,7 @@
         "@ctrl/ngx-emoji-mart": "^4.1.1",
         "core-js": "3.7.0",
         "linkifyjs": "2.1.9",
+        "ng-speed-test": "^2.2.0",
         "ng2-canvas-whiteboard": "^4.0.1",
         "openvidu-browser": "^2.20.0",
         "rxjs": "6.6.3",
