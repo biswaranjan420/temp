@@ -61,14 +61,24 @@ export class AuditlogService {
   public save(): Observable<any> {
 
     try {
-      this.http.post(this.WEBHOOK_URL, this.auditLog).subscribe(
-        (res) => {
+      // this.http.post(this.WEBHOOK_URL, this.auditLog).subscribe(
+      //   (res) => {
 
-        },
-        (err) => {
+      //   },
+      //   (err) => {
 
+      //   }
+      // )
+      var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+      xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log(this.responseText);
         }
-      )
+      };
+      xmlhttp.open("POST", this.WEBHOOK_URL);
+      xmlhttp.setRequestHeader("Content-Type", "application/json");
+      xmlhttp.send(JSON.stringify(this.auditLog));
+
     } catch (error) {
 
     }
