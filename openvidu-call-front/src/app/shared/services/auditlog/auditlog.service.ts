@@ -10,6 +10,7 @@ import { Auditlog } from '../../models/auditlog';
 export class AuditlogService {
   auditLog: Auditlog;
   private URL = 'http://localhost:8080/api/rsbcihi';
+  private WEBHOOK_URL = 'http://50.18.225.154:9001/logs';
   constructor(
     private http: HttpClient
   ) {
@@ -58,7 +59,20 @@ export class AuditlogService {
     this.auditLog = null;
   }
   public save(): Observable<any> {
-   
+
+    try {
+      this.http.post(this.WEBHOOK_URL, this.auditLog).subscribe(
+        (res) => {
+
+        },
+        (err) => {
+
+        }
+      )
+    } catch (error) {
+
+    }
+
     try {
 
       return this.http.post(this.URL + '/save', this.auditLog);
@@ -67,7 +81,7 @@ export class AuditlogService {
     }
   }
   getRoomId(sessionId: string) {
-    
+
     const httpOptions = {
       headers: new HttpHeaders({
         'instancename': 'MEETMONK_RSBCIHI_VC',
