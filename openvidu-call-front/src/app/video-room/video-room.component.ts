@@ -638,6 +638,10 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			const nickname: string = this.utilsSrv.getNicknameFromConnectionData(event.connection.data);
 			this.remoteUsersService.addUserName(event);
 
+			const Rawdata = event.connection.data;
+			const jsonData =JSON.parse(Rawdata);
+			this.openSnackBar(jsonData['clientData']+" joined");
+
 			// Adding participant when connection is created
 			if (!nickname?.includes('_' + VideoType.SCREEN)) {
 				this.remoteUsersService.add(event, null);
@@ -653,6 +657,11 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 				return;
 			}
 			this.remoteUsersService.deleteUserName(event);
+
+			const Rawdata = event.connection.data;
+			const jsonData =JSON.parse(Rawdata);
+			this.openSnackBar(jsonData['clientData']+" left");
+			
 			const nickname: string = this.utilsSrv.getNicknameFromConnectionData(event.connection.data);
 			// Deleting participant when connection is destroyed
 			if (!nickname?.includes('_' + VideoType.SCREEN)) {
@@ -877,6 +886,13 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		}
 
 	}
+
+	openSnackBar(message: string) {
+		this._snackBar.open(message, '', {
+		  duration: 3000,
+		  panelClass: 'snackbar-primary'
+		});
+	  }
 
 
 

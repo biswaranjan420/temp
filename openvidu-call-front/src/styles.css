@@ -52,3 +52,15 @@ body {
     font-size: 18px !important;
     margin-top: 50px !important;
 }
+
+.snackbar-primary {
+    color: blue !important;
+    background-color: white !important;
+    margin-top: 50px !important;
+}
+
+.snackbar-primary .mat-simple-snackbar {
+    justify-content: center !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+}

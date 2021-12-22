@@ -144,7 +144,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 			data: {
 				'message':'Are you sure you want to leave the session?',
 				'cancelBtn':true,
-				'okBtn':true
+				'okBtn':true,
+				'cancelBtnText': 'Cancel',
+				'okBtnText': 'OK'
 			}
 		});
 		this.dialogRef.afterClosed().subscribe(result => {

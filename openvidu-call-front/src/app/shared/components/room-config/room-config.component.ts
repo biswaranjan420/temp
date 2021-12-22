@@ -128,14 +128,44 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			if (OpenViduErrorName.DEVICE_ALREADY_IN_USE === error['name']) {
 				this.sessionEventObject.resourceNews = 'Camera is unavailable - being used by another program.'
 				this.configReady.emit(this.sessionEventObject);
+				this.dialogRef = this.dialog.open(DialogComponent, {
+					data: {
+						'OpenViduErrorName': error['name'],
+						'message': this.sessionEventObject.resourceNews,
+						'cancelBtn': true,
+						'okBtn': false,
+						'cancelBtnText': 'Close',
+						'okBtnText': 'OK'
+					}
+				});
 			}
 			if (OpenViduErrorName.DEVICE_ACCESS_DENIED === error['name']) {
 				this.sessionEventObject.resourceNews = 'Access to camera and microphone devices was not allowed.'
 				this.configReady.emit(this.sessionEventObject);
+				this.dialogRef = this.dialog.open(DialogComponent, {
+					data: {
+						'OpenViduErrorName': error['name'],
+						'message': this.sessionEventObject.resourceNews,
+						'cancelBtn': true,
+						'okBtn': false,
+						'cancelBtnText': 'Close',
+						'okBtnText': 'OK'
+					}
+				});
 			}
 			if (OpenViduErrorName.NO_INPUT_SOURCE_SET === error['name']) {
 				this.sessionEventObject.resourceNews = 'No camera or microphone devices have been found.'
 				this.configReady.emit(this.sessionEventObject);
+				this.dialogRef = this.dialog.open(DialogComponent, {
+					data: {
+						'OpenViduErrorName': error['name'],
+						'message': this.sessionEventObject.resourceNews,
+						'cancelBtn': true,
+						'okBtn': false,
+						'cancelBtnText': 'Close',
+						'okBtnText': 'OK'
+					}
+				});
 			}
 			console.error(error);
 		}
@@ -243,7 +273,9 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 						data: {
 							'message': event['message'],
 							'cancelBtn': false,
-							'okBtn': true
+							'okBtn': true,
+							'cancelBtnText': 'Cancel',
+							'okBtnText': 'OK'
 						}
 					});
 				}
