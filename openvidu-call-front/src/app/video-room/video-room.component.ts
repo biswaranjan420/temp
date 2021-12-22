@@ -207,6 +207,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 	}
 	onConfigReady(event: CustomSessionEvent) {
+		return;
 		if (event?.event === 'sessionConfig') {
 			this.customSessionEvent = event;
 		}

@@ -106,8 +106,8 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.columns = window.innerWidth > 900 ? 2 : 1;
 			this.setSessionName();
 			try {
-				const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
-				this.auditLogService.setRoomId(roomData['roomId']);
+				//const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
+				//this.auditLogService.setRoomId(roomData['roomId']);
 			} catch (error) {
 
 			}
