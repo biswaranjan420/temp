@@ -2,7 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Auditlog } from '../../models/auditlog';
+import { Auditlog, SystemResource } from '../../models/auditlog';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,8 @@ export class AuditlogService {
   private URL = 'http://localhost:8080/api/rsbcihi';
   private WEBHOOK_URL = 'http://50.18.225.154:9001/logs';
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private storageServ: StorageService
   ) {
     if (environment.production) {
       this.URL = 'https://configvc.meetmonk.com/MeetmonkVCAuditLog/api/rsbcihi';
@@ -25,67 +27,71 @@ export class AuditlogService {
   public getAuditLog(): Auditlog {
     return this.auditLog;
   }
-  public setHasAudio(value: boolean) {
-    this.auditLog.hasAudio = value;
-  }
-  public setHasVideo(value: boolean) {
-    this.auditLog.hasCamera = value;
-  }
-  public setAudioSource(source: string) {
-    this.auditLog.audioSource = source;
-  }
-  public setVideoSource(source: string) {
-    this.auditLog.videoSource = source;
-  }
-  public setEvent(value: string) {
-    this.auditLog.event = value;
-  }
-  public setResourceNews(value: string) {
-    this.auditLog.resourceNews = value;
-  }
+
   public setRoomId(roomId: any) {
     this.auditLog.roomId = roomId;
   }
   public setUserName(name: string) {
     this.auditLog.userName = name;
   }
-  public setSessionId(sessionId: string) {
-    this.auditLog.sessionId = sessionId;
+  public setRoomName(roomName: string) {
+    this.auditLog.roomName = roomName;
   }
-  public setSpeed(speed: string) {
-    this.auditLog.networkSpeed = speed;
+  public setSystemResource(systemResource: SystemResource) {
+    this.auditLog.systemResource = systemResource;
+  }
+  public setConnectionStatus(speed: any): boolean {
+    try {
+      const speedValue = parseInt(speed);
+      if (speedValue < 5) {
+        this.auditLog.connection_status = 'POOR';
+      }
+      if (speedValue >= 5 && speedValue <= 20) {
+        this.auditLog.connection_status = 'AVG';
+      }
+      if (speedValue > 20) {
+        this.auditLog.connection_status = 'GOOD';
+      }
+      if (this.storageServ.get("connection_status") != this.auditLog.connection_status) {
+        this.storageServ.set("connection_status", this.auditLog.connection_status);
+        return true;
+      } else {
+        return false;
+      }
+
+    } catch (e) {
+
+    }
+  }
+  public setParticipantStatus(participant_status: string) {
+    this.auditLog.participant_status = participant_status;
   }
   public reset(): void {
     this.auditLog = null;
   }
-  public save(): Observable<any> {
+  public save() {
+
+    this.auditLog.time = new Date();
+    // try {
+    //   this.http.post(this.WEBHOOK_URL, this.auditLog).subscribe(
+    //     (res) => {
+
+    //     },
+    //     (err) => {
+
+    //     }
+    //   )
+
+    // } catch (error) {
+
+    // }
 
     try {
-      // this.http.post(this.WEBHOOK_URL, this.auditLog).subscribe(
-      //   (res) => {
+      this.http.post(this.URL + '/save', this.auditLog).subscribe(
+        () => {
 
-      //   },
-      //   (err) => {
-
-      //   }
-      // )
-      var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-      xmlhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-          console.log(this.responseText);
         }
-      };
-      xmlhttp.open("POST", this.WEBHOOK_URL);
-      xmlhttp.setRequestHeader("Content-Type", "application/json");
-      xmlhttp.send(JSON.stringify(this.auditLog));
-
-    } catch (error) {
-
-    }
-
-    try {
-
-      return this.http.post(this.URL + '/save', this.auditLog);
+      )
     } catch (error) {
       // console.error(error);
     }

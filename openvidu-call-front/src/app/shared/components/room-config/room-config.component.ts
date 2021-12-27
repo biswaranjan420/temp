@@ -25,7 +25,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { DialogComponent } from '../dialog/dialog.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AuditlogService } from '../../services/auditlog/auditlog.service';
-import { CustomSessionEvent } from '../../models/auditlog';
+import { CustomSessionEvent, SystemResource } from '../../models/auditlog';
 
 @Component({
 	selector: 'app-room-config',
@@ -72,6 +72,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 	breakpoint: number;
 	private dialogRef: MatDialogRef<DialogComponent, any>;
 	sessionEventObject: CustomSessionEvent;
+	systemResource: SystemResource;
 	constructor(
 		private route: ActivatedRoute,
 		private utilsSrv: UtilsService,
@@ -105,9 +106,10 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.openviduAvatar = this.avatarService.getOpenViduAvatar();
 			this.columns = window.innerWidth > 900 ? 2 : 1;
 			this.setSessionName();
+			this.systemResource = new SystemResource();
 			try {
-				//const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
-				//this.auditLogService.setRoomId(roomData['roomId']);
+				const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
+				this.auditLogService.setRoomId(roomData['roomId']);
 			} catch (error) {
 
 			}
@@ -121,17 +123,17 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				this.emitPublisher(null);
 				this.showConfigCard = true;
 			}
-			this.sessionEventObject.resourceNews = 'All system resources are working as expected';
+			this.setAuditSessionEvent(2, 2);
 			this.configReady.emit(this.sessionEventObject);
 
 		} catch (error) {
 			if (OpenViduErrorName.DEVICE_ALREADY_IN_USE === error['name']) {
-				this.sessionEventObject.resourceNews = 'Camera is unavailable - being used by another program.'
+				this.setAuditSessionEvent(2, 1);
 				this.configReady.emit(this.sessionEventObject);
 				this.dialogRef = this.dialog.open(DialogComponent, {
 					data: {
 						'OpenViduErrorName': error['name'],
-						'message': this.sessionEventObject.resourceNews,
+						'message': 'Camera is unavailable - being used by another program.',
 						'cancelBtn': true,
 						'okBtn': false,
 						'cancelBtnText': 'Close',
@@ -140,12 +142,12 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				});
 			}
 			if (OpenViduErrorName.DEVICE_ACCESS_DENIED === error['name']) {
-				this.sessionEventObject.resourceNews = 'Access to camera and microphone devices was not allowed.'
+				this.setAuditSessionEvent(1, 1);
 				this.configReady.emit(this.sessionEventObject);
 				this.dialogRef = this.dialog.open(DialogComponent, {
 					data: {
 						'OpenViduErrorName': error['name'],
-						'message': this.sessionEventObject.resourceNews,
+						'message': 'Access to camera and microphone devices was not allowed.',
 						'cancelBtn': true,
 						'okBtn': false,
 						'cancelBtnText': 'Close',
@@ -154,12 +156,12 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				});
 			}
 			if (OpenViduErrorName.NO_INPUT_SOURCE_SET === error['name']) {
-				this.sessionEventObject.resourceNews = 'No camera or microphone devices have been found.'
+				this.setAuditSessionEvent(0, 0);
 				this.configReady.emit(this.sessionEventObject);
 				this.dialogRef = this.dialog.open(DialogComponent, {
 					data: {
 						'OpenViduErrorName': error['name'],
-						'message': this.sessionEventObject.resourceNews,
+						'message': 'No camera or microphone devices have been found.',
 						'cancelBtn': true,
 						'okBtn': false,
 						'cancelBtnText': 'Close',
@@ -172,6 +174,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		//this.configReady.emit('sessionConfig');
 		//Set role for conf coordinator role if it is cooardinator
 	}
+
 
 	ngOnDestroy() {
 		if (this.oVUsersSubscription) {
@@ -510,6 +513,11 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.utilsSrv.showErrorMessage(e.name.replace(/_/g, ' '), message, true);
 			this.log.e(e.message);
 		});
+	}
+	private setAuditSessionEvent(audio: number, video: number) {
+		this.systemResource.audio = audio;
+		this.systemResource.video = video;
+		this.sessionEventObject.systemResource = this.systemResource;
 	}
 
 

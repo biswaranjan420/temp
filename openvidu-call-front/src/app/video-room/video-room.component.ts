@@ -138,7 +138,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		if (!this.showConfigRoomCard) {
 			this.leaveSession();
 		}
-		this.sessionEventObject.event = 'participantLeft';
+		this.sessionEventObject.participant_status = 'LEFT';
 		this.onConfigReady(this.sessionEventObject);
 		if (this.intervalNetworkSpeed$) {
 			clearTimeout(this.intervalNetworkSpeed$);
@@ -206,69 +206,46 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		}
 
 	}
-	onConfigReady(event: CustomSessionEvent) {
-		return;
-		if (event?.event === 'sessionConfig') {
+	async onConfigReady(event: CustomSessionEvent) {
+		if (this.auditLogService.getAuditLog().roomId === 'NULL') {
+			return;
+		}
+		if (['RECONNECTING', 'RECONNECTED', 'NETWORKDISCONNECT'].indexOf(event?.participant_status) >= 0) {
+			return;
+		}
+		this.auditLogService.setParticipantStatus(event?.participant_status);
+		if (event?.participant_status === 'WAITING') {
 			this.customSessionEvent = event;
+			const speed: any = await this.getNetSpeed();
+			this.auditLogService.setConnectionStatus(speed);
 		}
-		this.auditLogService.setEvent(event?.event);
-		let currentResourceNews = event?.resourceNews;
-		if (currentResourceNews == undefined || currentResourceNews == '') {
-			currentResourceNews = this.customSessionEvent?.resourceNews;
-		}
-		this.auditLogService.setResourceNews(currentResourceNews);
 		this.setAuditLogPropert();
-		if (event?.event === 'sessionConfig') {
-			this.subscribeToNetwrkSpeedTest('sessionConfig');
+
+		if (event?.participant_status === 'JOINED') {
+			//this.subscribeToNetwrkSpeedTest('JOINED');
+			let _self = this;
+			this.intervalNetworkSpeed$ = setInterval(() => {
+				_self.getNetSpeed().then(
+					(res) => {
+						const isNetwChange = _self.auditLogService.setConnectionStatus(res);
+						console.warn(isNetwChange);
+						if (isNetwChange) {
+							this.auditLogService.setParticipantStatus('CONT');
+							this.auditLogService.save();
+						}
+					}
+				).catch(
+					(err) => {
+
+					}
+				)
+
+			}, 10000);
 		}
-		this.auditLogService.save().subscribe(
-			(res) => {
-				console.log(res);
-			},
-			(err) => {
-				console.error(err);
-			}
-		);
+		this.auditLogService.save();
 
 	}
-	async subscribeToNetwrkSpeedTest(ev: string) {
-		console.log('--------------: ' + ev);
-		if (ev === 'sessionConfig') {
-			let _self = this;
-			const speed: any = await this.getNetSpeed();
-			this.auditLogService.setEvent('NetworkSpeed');
-			this.auditLogService.setSpeed(speed);
-			this.auditLogService.save().subscribe(
-				(res) => {
-					console.log(res);
-				},
-				(err) => {
-					console.error(err);
-				}
 
-			);
-		}
-		if (ev === 'joinToSession') {
-			let _self = this;
-			const speed: any = await this.getNetSpeed();
-			this.auditLogService.setEvent('NetworkSpeed');
-			this.auditLogService.setSpeed(speed);
-			this.auditLogService.save().subscribe(
-				(res) => {
-					console.log(res);
-					_self.intervalNetworkSpeed$ = setTimeout(() => {
-						_self.subscribeToNetwrkSpeedTest('joinToSession');
-					}, 5000);
-				},
-				(err) => {
-					console.error(err);
-				}
-
-			);
-		}
-
-
-	}
 	getNetSpeed() {
 		return new Promise((resolve, reject) => {
 			this.speedTestService.getMbps(
@@ -291,12 +268,15 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		});
 	}
 	setAuditLogPropert() {
-		this.auditLogService.setHasAudio(this.oVDevicesService.hasAudioDeviceAvailable());
-		this.auditLogService.setHasVideo(this.oVDevicesService.hasVideoDeviceAvailable());
-		this.auditLogService.setAudioSource(this.oVDevicesService.getMicSelected()?.label);
-		this.auditLogService.setVideoSource(this.oVDevicesService.getCamSelected()?.label);
+		this.auditLogService.setSystemResource(this.customSessionEvent.systemResource);
 		this.auditLogService.setUserName(this.storageSrv.get(Storage.USER_NICKNAME));
-		this.auditLogService.setSessionId(sessionStorage.getItem('MeetMonkConfRoomName'));
+		this.auditLogService.setRoomName(sessionStorage.getItem('MeetMonkConfRoomName'));
+		// this.auditLogService.setHasAudio(this.oVDevicesService.hasAudioDeviceAvailable());
+		// this.auditLogService.setHasVideo(this.oVDevicesService.hasVideoDeviceAvailable());
+		// this.auditLogService.setAudioSource(this.oVDevicesService.getMicSelected()?.label);
+		// this.auditLogService.setVideoSource(this.oVDevicesService.getCamSelected()?.label);
+		// this.auditLogService.setUserName(this.storageSrv.get(Storage.USER_NICKNAME));
+
 	}
 	onConfigRoomJoin() {
 		this.hasVideoDevices = this.oVDevicesService.hasVideoDeviceAvailable();
@@ -338,7 +318,6 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			this.openViduWebRTCService.publishWebcamVideo(true);
 			this.openViduWebRTCService.publishWebcamVideo(false);
 		}
-		this.subscribeToNetwrkSpeedTest('joinToSession');
 
 	}
 
@@ -350,7 +329,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this._leaveSession.emit();
 	}
 	leaveSessionClicked() {
-		this.sessionEventObject.event = 'participantLeft';
+		this.sessionEventObject.participant_status = 'LEFT';
 		this.onConfigReady(this.sessionEventObject);
 		if (this.intervalNetworkSpeed$) {
 			clearTimeout(this.intervalNetworkSpeed$);
@@ -603,7 +582,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.oVLayout.update();
 
 		// Audit Logs For Joined
-		this.sessionEventObject.event = 'participantJoined';
+		this.sessionEventObject.participant_status = 'JOINED';
 		this.onConfigReady(this.sessionEventObject);
 
 	}
@@ -640,8 +619,8 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			this.remoteUsersService.addUserName(event);
 
 			const Rawdata = event.connection.data;
-			const jsonData =JSON.parse(Rawdata);
-			this.openSnackBar(jsonData['clientData']+" joined");
+			const jsonData = JSON.parse(Rawdata);
+			this.openSnackBar(jsonData['clientData'] + " joined");
 
 			// Adding participant when connection is created
 			if (!nickname?.includes('_' + VideoType.SCREEN)) {
@@ -660,9 +639,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			this.remoteUsersService.deleteUserName(event);
 
 			const Rawdata = event.connection.data;
-			const jsonData =JSON.parse(Rawdata);
-			this.openSnackBar(jsonData['clientData']+" left");
-			
+			const jsonData = JSON.parse(Rawdata);
+			this.openSnackBar(jsonData['clientData'] + " left");
+
 			const nickname: string = this.utilsSrv.getNicknameFromConnectionData(event.connection.data);
 			// Deleting participant when connection is destroyed
 			if (!nickname?.includes('_' + VideoType.SCREEN)) {
@@ -765,14 +744,14 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.session.on('reconnecting', () => {
 			this.log.w('Connection lost: Reconnecting');
 			this.isConnectionLost = true;
-			this.sessionEventObject.event = 'reconnecting';
+			this.sessionEventObject.participant_status = 'RECONNECTING';
 			this.onConfigReady(this.sessionEventObject);
 			this.utilsSrv.showErrorMessage('Connection Problem', 'Oops! Trying to reconnect to the session ...', true);
 		});
 		this.session.on('reconnected', () => {
 			this.log.w('Connection lost: Reconnected');
 			this.isConnectionLost = false;
-			this.sessionEventObject.event = 'reconnected';
+			this.sessionEventObject.participant_status = 'RECONNECTED';
 			this.onConfigReady(this.sessionEventObject);
 
 			this.utilsSrv.closeDialog();
@@ -780,7 +759,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.session.on('sessionDisconnected', (event: SessionDisconnectedEvent) => {
 			if (event.reason === 'networkDisconnect') {
 				this.utilsSrv.closeDialog();
-				this.sessionEventObject.event = 'networkDisconnect';
+				this.sessionEventObject.participant_status = 'NETWORKDISCONNECT';
 				this.onConfigReady(this.sessionEventObject);
 				this.leaveSession();
 			}
@@ -890,10 +869,10 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 	openSnackBar(message: string) {
 		this._snackBar.open(message, '', {
-		  duration: 3000,
-		  panelClass: 'snackbar-primary'
+			duration: 3000,
+			panelClass: 'snackbar-primary'
 		});
-	  }
+	}
 
 
 

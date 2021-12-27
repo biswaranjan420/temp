@@ -2,17 +2,15 @@ import { PlatformUtils } from "openvidu-browser/lib/OpenViduInternal/Utils/Platf
 
 export class Auditlog {
     roomId: string;
-    sessionId: string;
+    roomName: string;
     userId: string;
     userName: String;
-    event: string;
+    participant_status: string;
     platform: string;
-    hasAudio: boolean;
-    hasCamera: boolean;
-    audioSource: string;
-    videoSource: string;
-    resourceNews: string;
-    networkSpeed: string;
+    time:Date;
+    connection_status: string;
+    systemResource:SystemResource;
+    
 
     constructor() {
         this.userId = Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -24,11 +22,15 @@ export class Auditlog {
         return platForm.getDescription();
     }
 }
+export class SystemResource{
+    audio:number;
+    video:number
+}
 
 export class CustomSessionEvent {
-    event: string;
-    resourceNews: string;
+    participant_status: string;
+    systemResource:SystemResource
     constructor() {
-        this.event = 'sessionConfig';
+        this.participant_status = 'WAITING';
     }
 }
