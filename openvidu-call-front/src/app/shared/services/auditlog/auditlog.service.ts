@@ -2,14 +2,16 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Auditlog, SystemResource } from '../../models/auditlog';
+import { Auditlog, ChatReport, SystemResource } from '../../models/auditlog';
 import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuditlogService {
+
   auditLog: Auditlog;
+  chatReport: ChatReport;
   private URL = 'http://localhost:8080/api/rsbcihi';
   private WEBHOOK_URL = 'http://50.18.225.154:9001/logs';
   constructor(
@@ -19,6 +21,7 @@ export class AuditlogService {
     if (environment.production) {
       this.URL = 'https://configvc.meetmonk.com/MeetmonkVCAuditLog/api/rsbcihi';
     }
+    this.chatReport = new ChatReport();
   }
 
   public initialize() {
@@ -96,6 +99,23 @@ export class AuditlogService {
       // console.error(error);
     }
   }
+
+  saveChatReport(message: string) {
+    this.chatReport.time = new Date();
+    this.chatReport.message = message;
+    this.chatReport.userName = this.auditLog.userName;
+    this.chatReport.roomId = this.auditLog.roomId;
+    try {
+      this.http.post(this.URL + '/saveChatReport', this.chatReport).subscribe(
+        () => {
+
+        }
+      )
+    } catch (error) {
+      // console.error(error);
+    }
+  }
+
   getRoomId(sessionId: string) {
 
     const httpOptions = {
@@ -110,7 +130,7 @@ export class AuditlogService {
           resolve(res);
         },
         (err) => {
-          reject(err);
+          resolve({ 'roomId': 'NULL' });
         }
       )
     });

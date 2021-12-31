@@ -16,7 +16,7 @@
             <!-- //End of sidebar participants list -->
 
             <mat-sidenav #sidenav mode="{{ sidenavMode }}" position="end" class="sidenav-chat" [class.boundsLight]="lightTheme" fixedInViewport="true" fixedTopGap="40" fixedBottomGap="0" *ngIf="ovSettings | hasChat">
-                <chat-component #chatComponent [lightTheme]="lightTheme"></chat-component>
+                <chat-component #chatComponent [lightTheme]="lightTheme" (sendBtnClick)="sendBtnClick($event)"></chat-component>
             </mat-sidenav>
 
             <mat-sidenav-content class="sidenav-main">

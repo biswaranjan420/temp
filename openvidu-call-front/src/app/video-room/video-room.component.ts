@@ -245,6 +245,15 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.auditLogService.save();
 
 	}
+	sendBtnClick(message: string) {
+		if (message !== '' && message !== ' ') {
+			if (this.auditLogService.getAuditLog().roomId === 'NULL') {
+				return;
+			}
+			this.auditLogService.saveChatReport(message);
+		}
+		
+	}
 
 	getNetSpeed() {
 		return new Promise((resolve, reject) => {

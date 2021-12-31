@@ -329,6 +329,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		this.nicknameFormControl.valueChanges.subscribe((value) => {
 			this.localUsersService.updateUsersNickname(value);
 			this.storageSrv.set(Storage.USER_NICKNAME, value);
+			this.setAuditSessionEvent(2, 2);
 			this.configReady.emit(this.sessionEventObject);
 		});
 	}

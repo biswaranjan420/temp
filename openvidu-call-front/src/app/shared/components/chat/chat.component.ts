@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild, HostListener, OnDestroy } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild, HostListener, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { ChatService } from '../../services/chat/chat.service';
 import { ChatMessage } from '../../types/chat-type';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -15,6 +15,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
 
 	@Input() lightTheme: boolean;
+	@Output() sendBtnClick = new EventEmitter<string>();
 
 	message: string;
 
@@ -68,6 +69,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
 	sendMessage(): void {
 	   this.chatService.sendMessage(this.message);
+	   this.sendBtnClick.emit(this.message);
 	   this.message = '';
 
 		/*this.chatService.sendMessageOrMediaFiles(this.message, this.base64Array);
