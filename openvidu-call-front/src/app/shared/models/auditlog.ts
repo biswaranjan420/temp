@@ -29,7 +29,8 @@ export class SystemResource {
 
 export class CustomSessionEvent {
     participant_status: string;
-    systemResource: SystemResource
+    deviceStatus:string;
+    systemResource: SystemResource;
     constructor() {
         this.participant_status = 'WAITING';
     }

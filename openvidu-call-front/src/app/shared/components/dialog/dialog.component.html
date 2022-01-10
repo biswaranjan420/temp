@@ -5,7 +5,7 @@
 </div>
 
 <mat-dialog-content>
-    <div *ngIf="data['OpenViduErrorName']; else planeMessage">
+    <div *ngIf="data['OpenViduErrorName']; else planeMessage" style="white-space: pre;">
         {{data['message']}}
     </div>
     <ng-template #planeMessage>

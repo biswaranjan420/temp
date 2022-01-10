@@ -10,6 +10,7 @@ import { StorageService } from '../storage/storage.service';
 })
 export class AuditlogService {
 
+  deviceStatus: string;
   auditLog: Auditlog;
   chatReport: ChatReport;
   private URL = 'http://localhost:8080/api/rsbcihi';
@@ -43,6 +44,14 @@ export class AuditlogService {
   public setSystemResource(systemResource: SystemResource) {
     this.auditLog.systemResource = systemResource;
   }
+  public setDeviceStatus(status: string) {
+    if (status) {
+      this.deviceStatus = status;
+    }
+  }
+  public getDeviceStatus(): string {
+    return this.deviceStatus;
+  }
   public setConnectionStatus(speed: any): boolean {
     try {
       const speedValue = parseInt(speed);
@@ -71,6 +80,7 @@ export class AuditlogService {
   }
   public reset(): void {
     this.auditLog = null;
+    this.deviceStatus='';
   }
   public save() {
 

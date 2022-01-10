@@ -99,6 +99,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	customSessionEvent: CustomSessionEvent;
 	sessionEventObject: CustomSessionEvent;
 	intervalNetworkSpeed$: any;
+	deviceSnackbarErrorMsg:any;
 	constructor(
 		private router: Router,
 		private utilsSrv: UtilsService,
@@ -207,6 +208,18 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 
 	}
 	async onConfigReady(event: CustomSessionEvent) {
+		console.warn(event);
+		if (event?.participant_status === 'JOINED') {
+			if (this.auditLogService.getDeviceStatus()) {
+				if (this.auditLogService.getDeviceStatus() !== 'OK') {
+					this.deviceSnackbarErrorMsg = this._snackBar.open(this.auditLogService.getDeviceStatus(), '', {
+						horizontalPosition: 'center',
+						verticalPosition: 'top',
+						panelClass: 'snackbar-txtred-bkblack'
+					});
+				}
+			}
+		}
 		if (this.auditLogService.getAuditLog().roomId === 'NULL') {
 			return;
 		}
@@ -241,7 +254,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 				)
 
 			}, 10000);
+			
 		}
+
 		this.auditLogService.save();
 
 	}
@@ -252,7 +267,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 			}
 			this.auditLogService.saveChatReport(message);
 		}
-		
+
 	}
 
 	getNetSpeed() {
@@ -280,6 +295,7 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 		this.auditLogService.setSystemResource(this.customSessionEvent.systemResource);
 		this.auditLogService.setUserName(this.storageSrv.get(Storage.USER_NICKNAME));
 		this.auditLogService.setRoomName(sessionStorage.getItem('MeetMonkConfRoomName'));
+		
 		// this.auditLogService.setHasAudio(this.oVDevicesService.hasAudioDeviceAvailable());
 		// this.auditLogService.setHasVideo(this.oVDevicesService.hasVideoDeviceAvailable());
 		// this.auditLogService.setAudioSource(this.oVDevicesService.getMicSelected()?.label);
@@ -331,6 +347,9 @@ export class VideoRoomComponent implements OnInit, OnDestroy {
 	}
 
 	leaveSession() {
+		if(this.deviceSnackbarErrorMsg){
+			this.deviceSnackbarErrorMsg?.dismiss();
+		}
 		this.log.d('Leaving session...');
 		this.openViduWebRTCService.disconnect();
 		this.auditLogService.reset();

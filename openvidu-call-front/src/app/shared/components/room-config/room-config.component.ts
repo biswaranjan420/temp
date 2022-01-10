@@ -107,12 +107,13 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.columns = window.innerWidth > 900 ? 2 : 1;
 			this.setSessionName();
 			this.systemResource = new SystemResource();
-			try {
-				const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
-				this.auditLogService.setRoomId(roomData['roomId']);
-			} catch (error) {
+			this.auditLogService.setRoomId(this.validateValidRoomId(this.tokenService.getSessionId()));
+			// try {
+			// 	const roomData = await this.auditLogService.getRoomId(this.tokenService.getSessionId());
+			// 	this.auditLogService.setRoomId(roomData['roomId']);
+			// } catch (error) {
 
-			}
+			// }
 
 			await this.oVDevicesService.initDevices();
 			this.setDevicesInfo();
@@ -123,17 +124,19 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				this.emitPublisher(null);
 				this.showConfigCard = true;
 			}
-			this.setAuditSessionEvent(2, 2);
+			this.setAuditSessionEvent(2, 2, "OK");
 			this.configReady.emit(this.sessionEventObject);
 
 		} catch (error) {
+			const resourceCommonErrMsg = "Camera and Mic are unavailable. Either resources are blocked\n by other applications or browser has blocked them. Please check.";
 			if (OpenViduErrorName.DEVICE_ALREADY_IN_USE === error['name']) {
-				this.setAuditSessionEvent(2, 1);
+				const errorMessage = 'Camera and Mic are unavailable. Resources are occupied by other applications.';
+				this.setAuditSessionEvent(1, 1, errorMessage);
 				this.configReady.emit(this.sessionEventObject);
 				this.dialogRef = this.dialog.open(DialogComponent, {
 					data: {
 						'OpenViduErrorName': error['name'],
-						'message': 'Camera is unavailable - being used by another program.',
+						'message': resourceCommonErrMsg,
 						'cancelBtn': true,
 						'okBtn': false,
 						'cancelBtnText': 'Close',
@@ -142,12 +145,13 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				});
 			}
 			if (OpenViduErrorName.DEVICE_ACCESS_DENIED === error['name']) {
-				this.setAuditSessionEvent(1, 1);
+				const errorMessage = 'Camera and Mic are unavailable. Browser has blocked the resources. Please check.';
+				this.setAuditSessionEvent(1, 1, errorMessage);
 				this.configReady.emit(this.sessionEventObject);
 				this.dialogRef = this.dialog.open(DialogComponent, {
 					data: {
 						'OpenViduErrorName': error['name'],
-						'message': 'Access to camera and microphone devices was not allowed.',
+						'message': resourceCommonErrMsg,
 						'cancelBtn': true,
 						'okBtn': false,
 						'cancelBtnText': 'Close',
@@ -156,12 +160,13 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 				});
 			}
 			if (OpenViduErrorName.NO_INPUT_SOURCE_SET === error['name']) {
-				this.setAuditSessionEvent(0, 0);
+				const errorMessage = 'No camera or microphone devices have been found.';
+				this.setAuditSessionEvent(0, 0, errorMessage);
 				this.configReady.emit(this.sessionEventObject);
 				this.dialogRef = this.dialog.open(DialogComponent, {
 					data: {
 						'OpenViduErrorName': error['name'],
-						'message': 'No camera or microphone devices have been found.',
+						'message': errorMessage,
 						'cancelBtn': true,
 						'okBtn': false,
 						'cancelBtnText': 'Close',
@@ -329,7 +334,7 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 		this.nicknameFormControl.valueChanges.subscribe((value) => {
 			this.localUsersService.updateUsersNickname(value);
 			this.storageSrv.set(Storage.USER_NICKNAME, value);
-			this.setAuditSessionEvent(2, 2);
+			//this.setAuditSessionEvent(2, 2);
 			this.configReady.emit(this.sessionEventObject);
 		});
 	}
@@ -515,12 +520,25 @@ export class RoomConfigComponent implements OnInit, OnDestroy {
 			this.log.e(e.message);
 		});
 	}
-	private setAuditSessionEvent(audio: number, video: number) {
+	private setAuditSessionEvent(audio: number, video: number, status: string) {
 		this.systemResource.audio = audio;
 		this.systemResource.video = video;
+		this.auditLogService.setDeviceStatus(status);
 		this.sessionEventObject.systemResource = this.systemResource;
 	}
-
+	validateValidRoomId(sessionId: string) {
+		if (this.checkIfValidUUID(sessionId)) {
+			return sessionId;
+		} else {
+			return 'NULL';
+		}
+	}
+	/* Check if string is valid UUID */
+	private checkIfValidUUID(str: string) {
+		// Regular expression to check if string is a valid UUID
+		const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+		return regexExp.test(str);
+	}
 
 }
 

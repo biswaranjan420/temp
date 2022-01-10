@@ -1487,10 +1487,10 @@ mat-card {
     border-width: 2px;
     line-height: 50px;
     border-color: wheat;
-    padding: 25px 26px;
+    padding: 20px 24px;
     box-sizing: border-box;
-    height: 100px;
-    width: 100px;
+    height: 90px;
+    width: 90px;
     border: 1px solid #979797;
     background-color: #FFFFFF;
 }
