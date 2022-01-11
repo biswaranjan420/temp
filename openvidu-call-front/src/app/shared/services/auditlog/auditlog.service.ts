@@ -14,13 +14,14 @@ export class AuditlogService {
   auditLog: Auditlog;
   chatReport: ChatReport;
   private URL = 'http://localhost:8080/api/rsbcihi';
-  private WEBHOOK_URL = 'http://50.18.225.154:9001/logs';
+  private WEBHOOK_URL = 'NULL';
   constructor(
     private http: HttpClient,
     private storageServ: StorageService
   ) {
     if (environment.production) {
       this.URL = 'https://configvc.meetmonk.com/MeetmonkVCAuditLog/api/rsbcihi';
+      this.WEBHOOK_URL = 'https://us-central1-website-hosting-309708.cloudfunctions.net/updateStatus';
     }
     this.chatReport = new ChatReport();
   }
@@ -80,24 +81,25 @@ export class AuditlogService {
   }
   public reset(): void {
     this.auditLog = null;
-    this.deviceStatus='';
+    this.deviceStatus = '';
   }
   public save() {
-
     this.auditLog.time = new Date();
-    // try {
-    //   this.http.post(this.WEBHOOK_URL, this.auditLog).subscribe(
-    //     (res) => {
+    if (this.WEBHOOK_URL != 'NULL') {
+      try {
+        this.http.post(this.WEBHOOK_URL, this.auditLog).subscribe(
+          (res) => {
 
-    //     },
-    //     (err) => {
+          },
+          (err) => {
 
-    //     }
-    //   )
+          }
+        )
 
-    // } catch (error) {
+      } catch (error) {
 
-    // }
+      }
+    }
 
     try {
       this.http.post(this.URL + '/save', this.auditLog).subscribe(
