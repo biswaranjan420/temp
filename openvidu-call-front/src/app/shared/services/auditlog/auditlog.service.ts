@@ -21,7 +21,7 @@ export class AuditlogService {
   ) {
     if (environment.production) {
       this.URL = 'https://configvc.meetmonk.com/MeetmonkVCAuditLog/api/rsbcihi';
-      this.WEBHOOK_URL = 'https://us-central1-website-hosting-309708.cloudfunctions.net/updateStatus';
+      this.WEBHOOK_URL = 'https://us-west2-website-hosting-309708.cloudfunctions.net/updateStatus';
     }
     this.chatReport = new ChatReport();
   }
